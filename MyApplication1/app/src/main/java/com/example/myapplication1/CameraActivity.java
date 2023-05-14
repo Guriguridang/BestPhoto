@@ -1,10 +1,11 @@
 package com.example.myapplication1;
 
- import androidx.annotation.NonNull;
+import androidx.annotation.NonNull;
  import androidx.appcompat.app.AppCompatActivity;
  import android.Manifest;
  import android.app.Activity;
- import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.content.pm.PackageManager;
  import android.graphics.Bitmap;
  import android.media.MediaScannerConnection;
  import android.net.Uri;
@@ -48,6 +49,7 @@ public class CameraActivity extends AppCompatActivity {
     public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
     final List<Bitmap> mBitmapList = new ArrayList<>();
     private int mPictureCount = 0;
+    private static final int PICK_IMAGE_REQUEST = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +118,11 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
 
+
+
+
+
+
         //capture 버튼 클릭 시 촬영
 
 
@@ -126,6 +133,16 @@ public class CameraActivity extends AppCompatActivity {
 
 
     } //OnCreate()
+
+    // btn_gallery click event
+    public void onBtnGalleryClicked(View view)
+    {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
     public void bindPreview( @NonNull ProcessCameraProvider cameraProvider) {
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
                 .build(); //객체생성 후 돌려준다.

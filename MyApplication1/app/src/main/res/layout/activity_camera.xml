@@ -53,11 +53,12 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/gallery"
+            android:id="@+id/btn_gallery"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="gallery" />
+            android:text="gallery"
+            android:onClick="onBtnGalleryClicked" />
 
         <Button
             android:id="@+id/capture"
