@@ -134,7 +134,7 @@ public class CameraActivity extends AppCompatActivity {
 
     } //OnCreate()
 
-    // btn_gallery click event
+    // 갤러리 버튼 이벤트 추가
     public void onBtnGalleryClicked(View view)
     {
         Intent intent = new Intent();
