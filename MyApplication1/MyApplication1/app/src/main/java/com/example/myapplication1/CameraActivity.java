@@ -28,7 +28,7 @@ package com.example.myapplication1;
  import androidx.core.content.ContextCompat;
  import androidx.lifecycle.LifecycleOwner;
  import com.google.common.util.concurrent.ListenableFuture;
-//import com.kakao.sdk.common.util.Utility;
+
  import java.io.ByteArrayOutputStream;
  import java.io.File;
  import java.io.FileNotFoundException;
@@ -44,11 +44,6 @@ package com.example.myapplication1;
 
 public class CameraActivity extends AppCompatActivity {
 
-//    public hash getKeyHash() {
-//        return keyHash;
-//    }
-//public keyHash k=Utility.get
-//    public hash keyHash=Utility.getKeyHash(this);
     private static final String TAG="My T";
     public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
     final List<Bitmap> mBitmapList = new ArrayList<>();
@@ -61,8 +56,8 @@ public class CameraActivity extends AppCompatActivity {
 
         //PermissionCheck
 
-        //cameraPermissionCheck onCreate()에서 해야함
         int cameraPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
+
         if(cameraPermissionCheck != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 100);
@@ -70,9 +65,10 @@ public class CameraActivity extends AppCompatActivity {
         }
 
 
+
         //setContentView 이후 실행해야하는 xml요소(view) 불러오기
         //없어도 될 것 같은
-        final PreviewView s=findViewById(R.id.previewView);
+        final PreviewView previewView=findViewById(R.id.previewView);
         final Button change=findViewById(R.id.change);
 
 
@@ -88,6 +84,9 @@ public class CameraActivity extends AppCompatActivity {
                 //cameraProvider 생성
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 //미리보기 preview와 cameraProvider binding
+<<<<<<< HEAD
+                bindPreview(cameraProvider);
+=======
                 bindPreview(cameraProvider,CameraSelector.LENS_FACING_BACK);
 
                 change.setOnClickListener(new View.OnClickListener() {
@@ -103,16 +102,16 @@ public class CameraActivity extends AppCompatActivity {
                         }   //전면->후면
 
                         bindPreview(cameraProvider,currentLensFacing);
-                        //cameraselector 필요없다 생각. bindpreview 에서 해줌.
-//                        CameraSelector cameraSelector = new CameraSelector.Builder()
-//                                //Builder 인자에 아무것도 없으니, 필수인자는 없는것
-//                                //빌더 객체 생성 후 변경불가능상태
-//                                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-//                                .build();
+                        CameraSelector cameraSelector = new CameraSelector.Builder()
+                                //Builder 인자에 아무것도 없으니, 필수인자는 없는것
+                                //빌더 객체 생성 후 변경불가능상태
+                                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                                .build();
 
 
                     }
                 });        //change 버튼클릭 시 전/후면 전환
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
 
             } catch (ExecutionException | InterruptedException e) {
@@ -122,6 +121,25 @@ public class CameraActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
+<<<<<<< HEAD
+        //change 버튼클릭 시 전/후면 전환
+        change.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //change camera_back/front
+                CameraSelector cameraSelector = new CameraSelector.Builder()
+                        //Builder 인자에 아무것도 없으니, 필수인자는 없는것
+                        //빌더 객체 생성 후 변경불가능상태
+                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                        .build();
+
+
+            }
+        });
+=======
+
+
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
         //capture 버튼 클릭 시 촬영
 
@@ -129,8 +147,15 @@ public class CameraActivity extends AppCompatActivity {
 
 
 
+
+
+
     } //OnCreate()
+<<<<<<< HEAD
+    public void bindPreview( @NonNull ProcessCameraProvider cameraProvider) {
+=======
     public void bindPreview( @NonNull ProcessCameraProvider cameraProvider,int currentLensFacing) {
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
                 .build(); //객체생성 후 돌려준다.
 
@@ -140,7 +165,11 @@ public class CameraActivity extends AppCompatActivity {
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 //Builder 인자에 아무것도 없으니, 필수인자는 없는것
                 //빌더 객체 생성 후 변경불가능상태
+<<<<<<< HEAD
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+=======
                 .requireLensFacing(currentLensFacing)
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
                 .build();
 
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
@@ -149,15 +178,25 @@ public class CameraActivity extends AppCompatActivity {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build();
 
+<<<<<<< HEAD
+        cameraProvider.unbindAll();
+=======
         cameraProvider.unbindAll(); // 카메라와 연결된 usecase(미리보기, 사진/동영상 캡쳐..) 모두 해제
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
         //반환된 camera 객체의 메서드 2개: CameraControl->ListenableFuture, CameraInfo
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview, imageCapture);
 
         Button capture = findViewById(R.id.capture);
+<<<<<<< HEAD
+        capture.setOnClickListener(view -> {
+            startGifCapture(imageCapture);
+        });
+=======
 
         capture.setOnClickListener(view -> {
             startGifCapture(imageCapture);
         }); //리스너 익명함수로도 사용가능
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
 
 
@@ -167,8 +206,12 @@ public class CameraActivity extends AppCompatActivity {
     public void startGifCapture(ImageCapture imageCapture){
 
         mCameraExecutor = Executors.newSingleThreadExecutor();
+<<<<<<< HEAD
+
+=======
         List<File> photoFile=new ArrayList<>();
         File cacheDir =getCacheDir();
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
         mCameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -179,6 +222,18 @@ public class CameraActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+<<<<<<< HEAD
+                    Toast.makeText(getApplicationContext(),"이제 takepicture 실행",Toast.LENGTH_SHORT).show();
+                    imageCapture.takePicture(mCameraExecutor,new ImageCapture.OnImageCapturedCallback() {
+
+                        @Override
+                        public void onCaptureSuccess(@NonNull ImageProxy image) {
+                            super.onCaptureSuccess(image);
+
+
+
+                            // image.close(); // 해야하나? 아니라네요
+=======
 //                    runOnUiThread(new Runnable() {
 //                        @Override
 //                        public void run() {
@@ -187,9 +242,9 @@ public class CameraActivity extends AppCompatActivity {
 //                    });
 
 
-                    File file=new File(cacheDir,"image_"+(i+1)+".jpg");
-                    photoFile.add(file);
-                    ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(file)
+                    File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
+                    photoFile.add(ff);
+                    ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(ff)
                             .build();
 
 
@@ -197,7 +252,7 @@ public class CameraActivity extends AppCompatActivity {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                             if (!photoFile.isEmpty()){
-
+                               // Toast.makeText(getApplicationContext(),"사진 "+photoFile.size()+"번째 파일리스트에 저장됨",Toast.LENGTH_SHORT).show();
                                 //Toast UI thread(메인스레드)에서 실행되어야함
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -214,6 +269,27 @@ public class CameraActivity extends AppCompatActivity {
                         }
                     });  //callback메서드 통한 takepicture구현2
 
+                    /**
+                    imageCapture.takePicture(mCameraExecutor,new ImageCapture.OnImageCapturedCallback() {
+
+                        @Override
+                        public void onCaptureSuccess(@NonNull ImageProxy image) {
+                            super.onCaptureSuccess(image);
+                            // image.close(); // 언제해야함??
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
+                        } //OnCaptureSuccess 함수
+
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                            Log.e(TAG, "사진 촬영 실패", exception);
+                        }
+
+
+<<<<<<< HEAD
+                    }); //콜백메서드 통한 takePicture함수 구현
+=======
+                    }); 콜백메서드 통한 takePicture함수 구현(1)  */
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
 
                 }//for 반복문

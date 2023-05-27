@@ -2,8 +2,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-
-
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.4.2'
@@ -61,15 +59,10 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    def camerax_version = "1.1.0"
+    def camerax_version="1.1.0"
     implementation "androidx.camera:camera-view:${camerax_version}"
     implementation "androidx.camera:camera-core:${camerax_version}"
     implementation "androidx.camera:camera-camera2:${camerax_version}"
     implementation "androidx.camera:camera-lifecycle:${camerax_version}"
     implementation "androidx.camera:camera-extensions:${camerax_version}"
-
-    def v2_version = "2.11.0"
-    implementation "com.kakao.sdk:v2-all:${v2_version}"
-
-    //implementation group: 'com.kakao.sdk', name: 'kakaolink', version: project('.app').2.6.0
 }
