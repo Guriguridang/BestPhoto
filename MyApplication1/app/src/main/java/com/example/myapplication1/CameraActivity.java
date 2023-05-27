@@ -122,6 +122,11 @@ public class CameraActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
         //capture 버튼 클릭 시 촬영
 
@@ -185,6 +190,7 @@ public class CameraActivity extends AppCompatActivity {
 //                            Toast.makeText(getApplicationContext(), "이제 takepicture 실행", Toast.LENGTH_SHORT).show();
 //                        }
 //                    });
+<<<<<<< HEAD
 
 
                     File file=new File(cacheDir,"image_"+(i+1)+".jpg");
@@ -207,6 +213,45 @@ public class CameraActivity extends AppCompatActivity {
                                 });
                             }
 
+=======
+
+
+                    File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
+                    photoFile.add(ff);
+                    ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(ff)
+                            .build();
+
+
+                    imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
+                        @Override
+                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            if (!photoFile.isEmpty()){
+                               // Toast.makeText(getApplicationContext(),"사진 "+photoFile.size()+"번째 파일리스트에 저장됨",Toast.LENGTH_SHORT).show();
+                                //Toast UI thread(메인스레드)에서 실행되어야함
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+"번째 파일리스트에 저장됨", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+
+                        }
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                        }
+                    });  //callback메서드 통한 takepicture구현2
+
+                    /**
+                    imageCapture.takePicture(mCameraExecutor,new ImageCapture.OnImageCapturedCallback() {
+
+                        @Override
+                        public void onCaptureSuccess(@NonNull ImageProxy image) {
+                            super.onCaptureSuccess(image);
+                            // image.close(); // 언제해야함??
+                        } //OnCaptureSuccess 함수
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
                         }
                         @Override
@@ -215,6 +260,11 @@ public class CameraActivity extends AppCompatActivity {
                     });  //callback메서드 통한 takepicture구현2
 
 
+<<<<<<< HEAD
+=======
+                    }); 콜백메서드 통한 takePicture함수 구현(1)  */
+
+>>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
                 }//for 반복문
             } //run함수 구현
