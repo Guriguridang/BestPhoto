@@ -1,10 +1,19 @@
 package com.example.myapplication1;
 
+<<<<<<< HEAD
  import androidx.annotation.NonNull;
  import androidx.appcompat.app.AppCompatActivity;
  import android.Manifest;
  import android.app.Activity;
  import android.content.pm.PackageManager;
+=======
+import androidx.annotation.NonNull;
+ import androidx.appcompat.app.AppCompatActivity;
+ import android.Manifest;
+ import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+>>>>>>> 2716e5ece482428eb62375d50014d9e0b44abd5f
  import android.graphics.Bitmap;
  import android.media.MediaScannerConnection;
  import android.net.Uri;
@@ -53,6 +62,10 @@ public class CameraActivity extends AppCompatActivity {
     public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
     final List<Bitmap> mBitmapList = new ArrayList<>();
     private int mPictureCount = 0;
+<<<<<<< HEAD
+=======
+    private static final int PICK_IMAGE_REQUEST = 1;
+>>>>>>> 2716e5ece482428eb62375d50014d9e0b44abd5f
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,11 +135,6 @@ public class CameraActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
         //capture 버튼 클릭 시 촬영
 
@@ -135,6 +143,16 @@ public class CameraActivity extends AppCompatActivity {
 
 
     } //OnCreate()
+
+    // 갤러리 버튼 이벤트 추가
+    public void onBtnGalleryClicked(View view)
+    {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+    
     public void bindPreview( @NonNull ProcessCameraProvider cameraProvider,int currentLensFacing) {
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
                 .build(); //객체생성 후 돌려준다.
@@ -190,30 +208,7 @@ public class CameraActivity extends AppCompatActivity {
 //                            Toast.makeText(getApplicationContext(), "이제 takepicture 실행", Toast.LENGTH_SHORT).show();
 //                        }
 //                    });
-<<<<<<< HEAD
 
-
-                    File file=new File(cacheDir,"image_"+(i+1)+".jpg");
-                    photoFile.add(file);
-                    ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(file)
-                            .build();
-
-
-                    imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
-                        @Override
-                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                            if (!photoFile.isEmpty()){
-
-                                //Toast UI thread(메인스레드)에서 실행되어야함
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+"번째 파일리스트에 저장됨", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-
-=======
 
 
                     File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
@@ -226,7 +221,6 @@ public class CameraActivity extends AppCompatActivity {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
                             if (!photoFile.isEmpty()){
-                               // Toast.makeText(getApplicationContext(),"사진 "+photoFile.size()+"번째 파일리스트에 저장됨",Toast.LENGTH_SHORT).show();
                                 //Toast UI thread(메인스레드)에서 실행되어야함
                                 runOnUiThread(new Runnable() {
                                     @Override
@@ -243,28 +237,10 @@ public class CameraActivity extends AppCompatActivity {
                         }
                     });  //callback메서드 통한 takepicture구현2
 
-                    /**
-                    imageCapture.takePicture(mCameraExecutor,new ImageCapture.OnImageCapturedCallback() {
-
-                        @Override
-                        public void onCaptureSuccess(@NonNull ImageProxy image) {
-                            super.onCaptureSuccess(image);
-                            // image.close(); // 언제해야함??
-                        } //OnCaptureSuccess 함수
->>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
                         }
-                        @Override
-                        public void onError(@NonNull ImageCaptureException exception) {
-                        }
-                    });  //callback메서드 통한 takepicture구현2
 
 
-<<<<<<< HEAD
-=======
-                    }); 콜백메서드 통한 takePicture함수 구현(1)  */
-
->>>>>>> 7ba1dec1cf7b63b46d8d295cc212b6ac0b39bf24
 
                 }//for 반복문
             } //run함수 구현
