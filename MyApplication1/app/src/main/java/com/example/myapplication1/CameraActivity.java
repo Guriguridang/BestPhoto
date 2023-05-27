@@ -1,10 +1,19 @@
 package com.example.myapplication1;
 
+<<<<<<< HEAD
  import androidx.annotation.NonNull;
  import androidx.appcompat.app.AppCompatActivity;
  import android.Manifest;
  import android.app.Activity;
  import android.content.pm.PackageManager;
+=======
+import androidx.annotation.NonNull;
+ import androidx.appcompat.app.AppCompatActivity;
+ import android.Manifest;
+ import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+>>>>>>> 2716e5ece482428eb62375d50014d9e0b44abd5f
  import android.graphics.Bitmap;
  import android.media.MediaScannerConnection;
  import android.net.Uri;
@@ -48,6 +57,10 @@ public class CameraActivity extends AppCompatActivity {
     public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
     final List<Bitmap> mBitmapList = new ArrayList<>();
     private int mPictureCount = 0;
+<<<<<<< HEAD
+=======
+    private static final int PICK_IMAGE_REQUEST = 1;
+>>>>>>> 2716e5ece482428eb62375d50014d9e0b44abd5f
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +139,16 @@ public class CameraActivity extends AppCompatActivity {
 
 
     } //OnCreate()
+
+    // 갤러리 버튼 이벤트 추가
+    public void onBtnGalleryClicked(View view)
+    {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
     public void bindPreview( @NonNull ProcessCameraProvider cameraProvider) {
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
                 .build(); //객체생성 후 돌려준다.
