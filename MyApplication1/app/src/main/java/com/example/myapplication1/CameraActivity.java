@@ -14,8 +14,11 @@ import android.content.pm.PackageManager;
  import android.util.Log;
  import android.view.View;
  import android.widget.Button;
- import android.widget.Toast;
- import com.example.myapplication1.gifencoder.AnimatedGifEncoder;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.example.myapplication1.gifencoder.AnimatedGifEncoder;
 //CameraInfo, CameraControl 사용
  import androidx.camera.core.Camera;
  import androidx.camera.core.CameraSelector;
@@ -35,7 +38,8 @@ import android.content.pm.PackageManager;
  import java.io.FileNotFoundException;
  import java.io.FileOutputStream;
  import java.io.IOException;
- import java.nio.ByteBuffer;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
  import java.util.ArrayList;
  import java.util.List;
  import java.util.concurrent.ExecutionException;
@@ -50,7 +54,6 @@ public class CameraActivity extends AppCompatActivity {
     final List<Bitmap> mBitmapList = new ArrayList<>();
     private int mPictureCount = 0;
     private static final int PICK_IMAGE_REQUEST = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,23 +121,53 @@ public class CameraActivity extends AppCompatActivity {
             }
         });
 
-
-
-
-
-
         //capture 버튼 클릭 시 촬영
-
-
-
-
-
-
 
 
     } //OnCreate()
 
-    // 갤러리 버튼 이벤트 추가
+    // 이미지 저장
+    private void saveImageToGallery(Bitmap bitmap, String filename) {
+        OutputStream outputStream = null;
+        try {
+            File directory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File file = new File(directory, filename);
+            outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            Toast.makeText(this, "이미지가 갤러리에 저장되었습니다.", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Toast.makeText(this, "이미지 저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                    Toast.makeText(this, "이미지 갤러리 저장이 완료 되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "이미지 갤러리 저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+
+            }
+        }
+    }
+
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri selectedImageUri = data.getData();
+
+            Intent intent = new Intent(this, gifViewer.class);
+            intent.putExtra("imageUri", selectedImageUri.toString());
+            startActivity(intent);
+        }
+    }
+    /*
+    @ btn_gallery click event 정의
+     */
     public void onBtnGalleryClicked(View view)
     {
         Intent intent = new Intent();
@@ -142,6 +175,7 @@ public class CameraActivity extends AppCompatActivity {
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
+
 
     public void bindPreview( @NonNull ProcessCameraProvider cameraProvider) {
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
