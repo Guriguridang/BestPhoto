@@ -1,19 +1,12 @@
 package com.example.myapplication1;
 
-<<<<<<< HEAD
  import androidx.annotation.NonNull;
  import androidx.appcompat.app.AppCompatActivity;
  import android.Manifest;
  import android.app.Activity;
  import android.content.pm.PackageManager;
-=======
-import androidx.annotation.NonNull;
- import androidx.appcompat.app.AppCompatActivity;
- import android.Manifest;
- import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.PackageManager;
->>>>>>> 2716e5ece482428eb62375d50014d9e0b44abd5f
+ import android.content.Intent;
+ import android.graphics.Bitmap;
  import android.graphics.Bitmap;
  import android.media.MediaScannerConnection;
  import android.net.Uri;
@@ -62,10 +55,8 @@ public class CameraActivity extends AppCompatActivity {
     public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
     final List<Bitmap> mBitmapList = new ArrayList<>();
     private int mPictureCount = 0;
-<<<<<<< HEAD
-=======
     private static final int PICK_IMAGE_REQUEST = 1;
->>>>>>> 2716e5ece482428eb62375d50014d9e0b44abd5f
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,14 +222,11 @@ public class CameraActivity extends AppCompatActivity {
                             }
 
 
-                        }
+                        }  //onImageSaved
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
                         }
                     });  //callback메서드 통한 takepicture구현2
-
-
-                        }
 
 
 

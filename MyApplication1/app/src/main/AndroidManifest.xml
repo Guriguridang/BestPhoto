@@ -24,9 +24,6 @@
             android:name=".ShareActivity"
             android:exported="false" />
 
-        <queries>
-            <package android:name="com/kakao.link" />
-        </queries>
 
         <activity
             android:name=".CameraActivity"
