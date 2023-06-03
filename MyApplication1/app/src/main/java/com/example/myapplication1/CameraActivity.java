@@ -255,14 +255,18 @@ public class CameraActivity extends AppCompatActivity {
                     imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                            if (!photoFile.isEmpty()){
-                                //Toast UI thread(메인스레드)에서 실행되어야함
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+"번째 파일리스트에 저장됨", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+//                            if (!photoFile.isEmpty()){
+//                                //Toast UI thread(메인스레드)에서 실행되어야함
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+"번째 파일리스트에 저장됨", Toast.LENGTH_SHORT).show();
+//                                    }
+//                                });
+//                            } // if empty
+                            if (photoFile.size()==10){
+                                Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+                                startActivity(intentPic);
                             }
 
 
@@ -275,6 +279,7 @@ public class CameraActivity extends AppCompatActivity {
 
 
                 }//for 반복문
+
             } //run함수 구현
         }); //excute 함수
 
