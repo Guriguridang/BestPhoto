@@ -43,7 +43,7 @@ public class gifViewer extends AppCompatActivity {
         for (int i = 0; i < 10; i++) {
             ImageView image = new ImageView(this);
             // 이미지 설정
-            // image.setImageResource(R.drawable.image1); // 예시 이미지
+            image.setImageResource(R.drawable.myimage); // 예시 이미지
             // 이미지 크기 설정
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,

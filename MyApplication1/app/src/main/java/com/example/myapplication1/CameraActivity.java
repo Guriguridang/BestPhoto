@@ -59,24 +59,13 @@ public class CameraActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        //PermissionCheck
-
+        //cameraPermissionCheck onCreate()에서 해야함
         int cameraPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
-        int readPermissionCheck= ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE);
-        int writePermissionCheck= ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
         if(cameraPermissionCheck != PackageManager.PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 100);
             //100 REQUEST_CAMERA_PERMISSION
         }
-
-        //저장소 접근권한
-        if (readPermissionCheck!= PackageManager.PERMISSION_GRANTED || writePermissionCheck!=PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 200);
-            //200 STORAGE_PERMISSION_REQUEST_CODE
-        }
-
 
         //setContentView 이후 실행해야하는 xml요소(view) 불러오기
         //없어도 될 것 같은
@@ -96,8 +85,30 @@ public class CameraActivity extends AppCompatActivity {
                 //cameraProvider 생성
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 //미리보기 preview와 cameraProvider binding
-                bindPreview(cameraProvider);
+                bindPreview(cameraProvider,CameraSelector.LENS_FACING_BACK);
+                change.setOnClickListener(new View.OnClickListener() {
+                    private int currentLensFacing=CameraSelector.LENS_FACING_BACK;
+                    @Override
+                    public void onClick(View v) {
 
+                        if(currentLensFacing==CameraSelector.LENS_FACING_BACK){
+                            currentLensFacing=CameraSelector.LENS_FACING_FRONT;
+                        }   //후면->전면
+                        else{
+                            currentLensFacing=CameraSelector.LENS_FACING_BACK;
+                        }   //전면->후면
+
+                        bindPreview(cameraProvider,currentLensFacing);
+                        //cameraselector 필요없다 생각. bindpreview 에서 해줌.
+//                        CameraSelector cameraSelector = new CameraSelector.Builder()
+//                                //Builder 인자에 아무것도 없으니, 필수인자는 없는것
+//                                //빌더 객체 생성 후 변경불가능상태
+//                                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+//                                .build();
+
+
+                    }
+                });        //change 버튼클릭 시 전/후면 전환
 
             } catch (ExecutionException | InterruptedException e) {
                 // No errors need to be handled for this Future.
@@ -107,21 +118,6 @@ public class CameraActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
 
         //change 버튼클릭 시 전/후면 전환
-        change.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //change camera_back/front
-                CameraSelector cameraSelector = new CameraSelector.Builder()
-                        //Builder 인자에 아무것도 없으니, 필수인자는 없는것
-                        //빌더 객체 생성 후 변경불가능상태
-                        .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-                        .build();
-
-
-            }
-        });
-
-        //capture 버튼 클릭 시 촬영
 
 
     } //OnCreate()
@@ -177,7 +173,8 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-    public void bindPreview( @NonNull ProcessCameraProvider cameraProvider) {
+    public void bindPreview( @NonNull ProcessCameraProvider cameraProvider, int currentLensFacing) {
+
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
                 .build(); //객체생성 후 돌려준다.
 
@@ -187,7 +184,7 @@ public class CameraActivity extends AppCompatActivity {
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 //Builder 인자에 아무것도 없으니, 필수인자는 없는것
                 //빌더 객체 생성 후 변경불가능상태
-                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .requireLensFacing(currentLensFacing)
                 .build();
 
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
@@ -196,24 +193,28 @@ public class CameraActivity extends AppCompatActivity {
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
                 .build();
 
-        cameraProvider.unbindAll();
+        cameraProvider.unbindAll(); // 카메라와 연결된 usecase(미리보기, 사진/동영상 캡쳐..) 모두 해제
         //반환된 camera 객체의 메서드 2개: CameraControl->ListenableFuture, CameraInfo
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview, imageCapture);
 
         Button capture = findViewById(R.id.capture);
+
         capture.setOnClickListener(view -> {
             startGifCapture(imageCapture);
-        });
+        }); //리스너 익명함수로도 사용가능
 
 
 
 
     }
     //bindPreview 함수 구현
+
+
     public void startGifCapture(ImageCapture imageCapture){
 
         mCameraExecutor = Executors.newSingleThreadExecutor();
-
+        List<File> photoFile=new ArrayList<>();
+        File cacheDir =getCacheDir();
         mCameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -224,25 +225,41 @@ public class CameraActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    Toast.makeText(getApplicationContext(),"이제 takepicture 실행",Toast.LENGTH_SHORT).show();
-                    imageCapture.takePicture(mCameraExecutor,new ImageCapture.OnImageCapturedCallback() {
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(getApplicationContext(), "이제 takepicture 실행", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
 
+
+
+                    File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
+                    photoFile.add(ff);
+                    ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(ff)
+                            .build();
+
+
+                    imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
                         @Override
-                        public void onCaptureSuccess(@NonNull ImageProxy image) {
-                            super.onCaptureSuccess(image);
+                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            if (!photoFile.isEmpty()){
+                                //Toast UI thread(메인스레드)에서 실행되어야함
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+"번째 파일리스트에 저장됨", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
 
 
-
-                            // image.close(); // 해야하나? 아니라네요
-                        } //OnCaptureSuccess 함수
-
+                        }  //onImageSaved
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
-                            Log.e(TAG, "사진 촬영 실패", exception);
                         }
+                    });  //callback메서드 통한 takepicture구현2
 
-
-                    }); //콜백메서드 통한 takePicture함수 구현
 
 
                 }//for 반복문

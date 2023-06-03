@@ -20,14 +20,14 @@
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="300dp"
         android:layout_below="@id/m_imageView"
         app:layout_constraintTop_toBottomOf="@id/m_imageView">
 
         <LinearLayout
             android:id="@+id/llImagesContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <!-- 여기에 10개의 이미지를 동적으로 추가 -->
