@@ -15,8 +15,11 @@ package com.example.myapplication1;
  import android.util.Log;
  import android.view.View;
  import android.widget.Button;
- import android.widget.Toast;
- import com.example.myapplication1.gifencoder.AnimatedGifEncoder;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
+import com.example.myapplication1.gifencoder.AnimatedGifEncoder;
 //CameraInfo, CameraControl 사용
  import androidx.camera.core.Camera;
  import androidx.camera.core.CameraSelector;
@@ -36,12 +39,15 @@ package com.example.myapplication1;
  import java.io.FileNotFoundException;
  import java.io.FileOutputStream;
  import java.io.IOException;
- import java.nio.ByteBuffer;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
  import java.util.ArrayList;
  import java.util.List;
  import java.util.concurrent.ExecutionException;
  import java.util.concurrent.ExecutorService;
  import java.util.concurrent.Executors;
+
+ import retrofit2.http.HEAD;
 
 
 public class CameraActivity extends AppCompatActivity {
@@ -57,13 +63,11 @@ public class CameraActivity extends AppCompatActivity {
     private int mPictureCount = 0;
     private static final int PICK_IMAGE_REQUEST = 1;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
 
-        //PermissionCheck
 
         //cameraPermissionCheck onCreate()에서 해야함
         int cameraPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -72,7 +76,6 @@ public class CameraActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 100);
             //100 REQUEST_CAMERA_PERMISSION
         }
-
 
         //setContentView 이후 실행해야하는 xml요소(view) 불러오기
         //없어도 될 것 같은
@@ -115,9 +118,9 @@ public class CameraActivity extends AppCompatActivity {
 //                                .build();
 
 
+
                     }
                 });        //change 버튼클릭 시 전/후면 전환
-
 
             } catch (ExecutionException | InterruptedException e) {
                 // No errors need to be handled for this Future.
@@ -127,15 +130,52 @@ public class CameraActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
 
 
-        //capture 버튼 클릭 시 촬영
-
-
-
 
 
     } //OnCreate()
 
-    // 갤러리 버튼 이벤트 추가
+    // 이미지 저장
+    private void saveImageToGallery(Bitmap bitmap, String filename) {
+        OutputStream outputStream = null;
+        try {
+            File directory = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+            File file = new File(directory, filename);
+            outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            Toast.makeText(this, "이미지가 갤러리에 저장되었습니다.", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Toast.makeText(this, "이미지 저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        } finally {
+            try {
+                if (outputStream != null) {
+                    outputStream.close();
+                    Toast.makeText(this, "이미지 갤러리 저장이 완료 되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "이미지 갤러리 저장에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+
+            }
+        }
+    }
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri selectedImageUri = data.getData();
+
+
+            Intent intent = new Intent(this, gifViewer.class);
+            intent.putExtra("imageUri", selectedImageUri.toString());
+            startActivity(intent);
+        }
+    }
+    /*
+    @ btn_gallery click event 정의
+     */
     public void onBtnGalleryClicked(View view)
     {
         Intent intent = new Intent();
@@ -143,8 +183,10 @@ public class CameraActivity extends AppCompatActivity {
         intent.setAction(Intent.ACTION_GET_CONTENT);
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
-    
-    public void bindPreview( @NonNull ProcessCameraProvider cameraProvider,int currentLensFacing) {
+
+
+    public void bindPreview( @NonNull ProcessCameraProvider cameraProvider, int currentLensFacing) {
+
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
                 .build(); //객체생성 후 돌려준다.
 
@@ -178,6 +220,8 @@ public class CameraActivity extends AppCompatActivity {
 
     }
     //bindPreview 함수 구현
+
+
     public void startGifCapture(ImageCapture imageCapture){
 
         mCameraExecutor = Executors.newSingleThreadExecutor();
