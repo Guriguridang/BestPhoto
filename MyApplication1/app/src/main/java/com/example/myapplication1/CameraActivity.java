@@ -69,21 +69,12 @@ public class CameraActivity extends AppCompatActivity {
     private int currentLensFacing;
     private Camera camera;
     ArrayList<ParcelableFile> photoFile=new ArrayList<>();   // 여기서 해볼게요. 맨위는 ㅂㄹ
-
     File cacheDir;
-
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-
-
-
 
         //cameraPermissionCheck onCreate()에서 해야함
         int cameraPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -103,9 +94,6 @@ public class CameraActivity extends AppCompatActivity {
 
         currentLensFacing=CameraSelector.LENS_FACING_BACK;
 
-
-
-
     } //OnCreate()
 
     @Override
@@ -114,12 +102,6 @@ public class CameraActivity extends AppCompatActivity {
 
         final Button change=findViewById(R.id.change);
         photoFile.clear();  // clear
-
-
-
-
-
-
 
         //CameraProvider 요청
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
@@ -148,21 +130,11 @@ public class CameraActivity extends AppCompatActivity {
                         }   //전면->후면
 
                         bindPreview(cameraProvider,currentLensFacing);
-                        //cameraselector 필요없다 생각. bindpreview 에서 해줌.
-//                        CameraSelector cameraSelector = new CameraSelector.Builder()
-//                                //Builder 인자에 아무것도 없으니, 필수인자는 없는것
-//                                //빌더 객체 생성 후 변경불가능상태
-//                                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-//                                .build();
-
-
 
                     }
                 });        //change 버튼클릭 시 전/후면 전환
 
             } catch (ExecutionException | InterruptedException e) {
-                // No errors need to be handled for this Future.
-                // This should never be reached.
                 e.printStackTrace();
             }
         }, ContextCompat.getMainExecutor(this));
@@ -197,9 +169,6 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onStart(){
         super.onStart();
-
-
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -240,7 +209,6 @@ public class CameraActivity extends AppCompatActivity {
 
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             Uri selectedImageUri = data.getData();
-
 
             Intent intent = new Intent(this, gifViewer.class);
             intent.putExtra("imageUri", selectedImageUri.toString());
@@ -301,12 +269,9 @@ public class CameraActivity extends AppCompatActivity {
 
         mCameraExecutor = Executors.newSingleThreadExecutor();
 
-
-
         mCameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-
 
 
                 for (int i = 0; photoFile.size()!=10; i++) {
@@ -317,14 +282,6 @@ public class CameraActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(getApplicationContext(), "이제 takepicture 실행", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-
-
 
                     File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
                     ParcelableFile parcelableFile=new ParcelableFile(ff.getAbsolutePath());
@@ -333,12 +290,9 @@ public class CameraActivity extends AppCompatActivity {
                     ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(ff)
                             .build();
 
-
                     imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-
-
 
 
 //                            //오옷 1?

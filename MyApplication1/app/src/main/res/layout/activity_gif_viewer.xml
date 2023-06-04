@@ -22,11 +22,12 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_below="@id/m_imageView"
-        app:layout_constraintTop_toBottomOf="@id/m_imageView">
+        app:layout_constraintTop_toBottomOf="@id/m_imageView"
+        android:fillViewport="true">
 
         <LinearLayout
             android:id="@+id/llImagesContainer"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
@@ -34,6 +35,8 @@
 
         </LinearLayout>
     </HorizontalScrollView>
+
+
 
     <LinearLayout
         android:id="@+id/llButtons"

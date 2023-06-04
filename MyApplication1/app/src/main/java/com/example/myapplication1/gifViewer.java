@@ -37,6 +37,7 @@ public class gifViewer extends AppCompatActivity {
         llImagesContainer = findViewById(R.id.llImagesContainer);
 
         //=================
+        // 촬영 intent를 받은 경우
         Intent intent=getIntent();
         ArrayList<ParcelableFile> photoFile = intent.getParcelableArrayListExtra("photoFile");
         if (photoFile.size()!=0){
@@ -68,26 +69,20 @@ public class gifViewer extends AppCompatActivity {
             );
 
             // 이미지 간격 설정
-            params.setMargins(10, 0, 10, 0);
+            params.setMargins(0, 0, 0, 0);
             // 이미지뷰에 크기 및 간격 설정 적용
             image.setLayoutParams(params);
             // 이미지뷰를 가로 스크롤뷰에 추가
             llImagesContainer.addView(image);
+
+            // n번 째 이미지 추출 이벤트
+            image.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getApplicationContext(), "이미지를 선택했습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
-
-
-
-
-        //===================
-
-
-        // Intent에서 전달받은 이미지 URI를 가져옴
-        /*
-        String imageUriString = getIntent().getStringExtra("imageUri");
-        Uri imageUri = Uri.parse(imageUriString);
-
-        // 이미지 URI를 ImageView에 설정하여 gif 이미지 표시
-        Glide.with(this).asGif().load(imageUri).into(imageView);
 
         // 10개의 이미지를 동적으로 추가
         for (int i = 0; i < 10; i++) {
@@ -108,9 +103,15 @@ public class gifViewer extends AppCompatActivity {
             llImagesContainer.addView(image);
         }
 
+        // 갤러리 인텐트 받은 경우
+        // Intent에서 전달받은 이미지 URI를 가져옴
+        String imageUriString = getIntent().getStringExtra("imageUri");
+        Uri imageUri = Uri.parse(imageUriString);
+        // 이미지 URI를 ImageView에 설정하여 gif 이미지 표시
+        Glide.with(this).asGif().load(imageUri).into(imageView);
 
 
-        // 프레임 추출 버튼 클릭 이벤트 처리
+        // 프레임 추출 버튼 클릭 이벤트 처리(시연에 사용하지x)
         Button extractFramesButton = findViewById(R.id.btnExtractFrames);
         extractFramesButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,8 +120,9 @@ public class gifViewer extends AppCompatActivity {
                 extractFrames();
             }
         });
-        */
+
     }
+
 
     // "재촬영" 버튼 클릭 이벤트 처리 (@선영님)
     public void onCaptureButtonClicked(View view) {
