@@ -114,12 +114,7 @@ public class CameraActivity extends AppCompatActivity {
 
         final Button change=findViewById(R.id.change);
         photoFile.clear();  // clear
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(getApplicationContext(),"resume",Toast.LENGTH_SHORT).show();
-            }
-        });
+
 
 
 
@@ -191,7 +186,7 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onStop(){
         super.onStop();
-        photoFile=null;   // 여기서 해볼게요. 맨위는 ㅂㄹ
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -332,8 +327,8 @@ public class CameraActivity extends AppCompatActivity {
 
 
                     File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
-//                    ParcelableFile parcelableFile=new ParcelableFile(ff.getAbsolutePath());
-//                    photoFile.add(parcelableFile);
+                    ParcelableFile parcelableFile=new ParcelableFile(ff.getAbsolutePath());
+                    photoFile.add(parcelableFile);
 
                     ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(ff)
                             .build();
@@ -344,25 +339,22 @@ public class CameraActivity extends AppCompatActivity {
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
 
 
-                            ParcelableFile parcelableFile = new ParcelableFile(ff.getAbsolutePath());
-                            photoFile.add(parcelableFile);
 
 
-//                            //오옷?
-                            if (photoFile.size()==10) {
-
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
-                                        intentPic.putParcelableArrayListExtra("photoFile", photoFile);
-                                        Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
-                                        startActivity(intentPic);
-                                    }
-                                });
-
-                            }
+//                            //오옷 1?
+//                            if (photoFile.size()==10) {
+//
+//                                runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+//                                        intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+//                                        Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
+//                                        startActivity(intentPic);
+//                                    }
+//                                });
+//
+//                            }  // #1
 
                             //여기 넣어보자
                         }  //onImageSaved
@@ -372,23 +364,18 @@ public class CameraActivity extends AppCompatActivity {
                     });  //callback메서드 통한 takepicture구현2
 
                     //여기 넣어볼게요
-                    //오옷?
-                    if (photoFile.size()!=0) {
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
-
-                                intentPic.putParcelableArrayListExtra("photoFile", photoFile);
-
-                                startActivity(intentPic);
-
-                            }
-                        });
-
-
-                    }  // 10장 리스트 됐으면
+                    //오옷 2?
+//                    if (photoFile.size()!=0) {
+//
+//
+//                                Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+//
+//                                intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+//                                startActivity(intentPic);
+//
+//
+//
+//                    }  // #2
 
 
 
@@ -409,9 +396,6 @@ public class CameraActivity extends AppCompatActivity {
 //                    });
 //                    startActivity(intentPic);
 //
-//
-//
-//
 //                }
 
 
@@ -420,6 +404,22 @@ public class CameraActivity extends AppCompatActivity {
 
             } //run함수 구현
         }); //excute 함수
+
+        // # 3 여기에
+        if (photoFile.size()==10) {
+
+            Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+
+            intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
+                }
+            });
+            startActivity(intentPic);
+
+        }
 
 
     }     // startGifCapture 함수 구현
