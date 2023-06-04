@@ -1,58 +1,61 @@
 package com.example.myapplication1;
 
- import androidx.annotation.NonNull;
- import androidx.appcompat.app.AppCompatActivity;
- import android.Manifest;
- import android.app.Activity;
- import android.content.pm.PackageManager;
- import android.content.Intent;
- import android.graphics.Bitmap;
- import android.graphics.Bitmap;
- import android.media.MediaScannerConnection;
- import android.net.Uri;
- import android.os.Bundle;
- import android.os.Environment;
- import android.util.Log;
- import android.view.View;
- import android.widget.Button;
+import com.example.myapplication1.ParcelableFile;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Parcelable;
+import android.util.Log;
+import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.myapplication1.gifencoder.AnimatedGifEncoder;
 //CameraInfo, CameraControl 사용
- import androidx.camera.core.Camera;
- import androidx.camera.core.CameraSelector;
- import androidx.camera.core.ImageCapture;
- import androidx.camera.core.ImageCaptureException;
- import androidx.camera.core.ImageProxy;
- import androidx.camera.core.Preview;
- import androidx.camera.lifecycle.ProcessCameraProvider;
- import androidx.camera.view.PreviewView;
- import androidx.core.app.ActivityCompat;
- import androidx.core.content.ContextCompat;
- import androidx.lifecycle.LifecycleOwner;
- import com.google.common.util.concurrent.ListenableFuture;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleOwner;
+import com.google.common.util.concurrent.ListenableFuture;
 //import com.kakao.sdk.common.util.Utility;
- import java.io.ByteArrayOutputStream;
- import java.io.File;
- import java.io.FileNotFoundException;
- import java.io.FileOutputStream;
- import java.io.IOException;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
- import java.util.ArrayList;
- import java.util.List;
- import java.util.concurrent.ExecutionException;
- import java.util.concurrent.ExecutorService;
- import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
- import retrofit2.http.HEAD;
+//import retrofit2.http.HEAD;
 
 
 public class CameraActivity extends AppCompatActivity {
 
-//    public hash getKeyHash() {
+    //    public hash getKeyHash() {
 //        return keyHash;
 //    }
 //public keyHash k=Utility.get
@@ -63,10 +66,23 @@ public class CameraActivity extends AppCompatActivity {
     private int mPictureCount = 0;
     private static final int PICK_IMAGE_REQUEST = 1;
 
+    private int currentLensFacing;
+    private Camera camera;
+    ArrayList<ParcelableFile> photoFile=new ArrayList<>();   // 여기서 해볼게요. 맨위는 ㅂㄹ
+
+    File cacheDir;
+
+
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+
 
 
         //cameraPermissionCheck onCreate()에서 해야함
@@ -80,7 +96,34 @@ public class CameraActivity extends AppCompatActivity {
         //setContentView 이후 실행해야하는 xml요소(view) 불러오기
         //없어도 될 것 같은
         final PreviewView s=findViewById(R.id.previewView);
+
+
+        //ArrayList<ParcelableFile> photoFile=new ArrayList<>();   // 여기서 해볼게요. 맨위는 ㅂㄹ
+        cacheDir =getCacheDir();
+
+        currentLensFacing=CameraSelector.LENS_FACING_BACK;
+
+
+
+
+    } //OnCreate()
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+
         final Button change=findViewById(R.id.change);
+        photoFile.clear();  // clear
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(),"resume",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
+
 
 
         //CameraProvider 요청
@@ -95,10 +138,10 @@ public class CameraActivity extends AppCompatActivity {
                 //cameraProvider 생성
                 ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                 //미리보기 preview와 cameraProvider binding
-                bindPreview(cameraProvider,CameraSelector.LENS_FACING_BACK);
+                bindPreview(cameraProvider,currentLensFacing);
 
                 change.setOnClickListener(new View.OnClickListener() {
-                    private int currentLensFacing=CameraSelector.LENS_FACING_BACK;
+
                     @Override
                     public void onClick(View v) {
 
@@ -129,11 +172,47 @@ public class CameraActivity extends AppCompatActivity {
             }
         }, ContextCompat.getMainExecutor(this));
 
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(),"1onPause",Toast.LENGTH_SHORT).show();}
+
+        });
+
+    }
+
+    @Override
+    protected void onStop(){
+        super.onStop();
+        photoFile=null;   // 여기서 해볼게요. 맨위는 ㅂㄹ
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(),"1onStop",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    @Override
+    protected void onStart(){
+        super.onStart();
 
 
 
-    } //OnCreate()
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(),"1onStart",Toast.LENGTH_SHORT).show();
+            }
+        });
 
+    }
     // 이미지 저장
     private void saveImageToGallery(Bitmap bitmap, String filename) {
         OutputStream outputStream = null;
@@ -192,7 +271,6 @@ public class CameraActivity extends AppCompatActivity {
 
         final PreviewView previewView=findViewById(R.id.previewView);//previewView를 바로 넣을 수 없어서.....
 
-
         CameraSelector cameraSelector = new CameraSelector.Builder()
                 //Builder 인자에 아무것도 없으니, 필수인자는 없는것
                 //빌더 객체 생성 후 변경불가능상태
@@ -207,11 +285,13 @@ public class CameraActivity extends AppCompatActivity {
 
         cameraProvider.unbindAll(); // 카메라와 연결된 usecase(미리보기, 사진/동영상 캡쳐..) 모두 해제
         //반환된 camera 객체의 메서드 2개: CameraControl->ListenableFuture, CameraInfo
-        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview, imageCapture);
+        camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview, imageCapture);
 
         Button capture = findViewById(R.id.capture);
 
         capture.setOnClickListener(view -> {
+
+
             startGifCapture(imageCapture);
         }); //리스너 익명함수로도 사용가능
 
@@ -225,15 +305,20 @@ public class CameraActivity extends AppCompatActivity {
     public void startGifCapture(ImageCapture imageCapture){
 
         mCameraExecutor = Executors.newSingleThreadExecutor();
-        List<File> photoFile=new ArrayList<>();
-        File cacheDir =getCacheDir();
+
+
+
         mCameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
 
-                for (int i = 0; i < 10; i++) {
+
+
+                for (int i = 0; photoFile.size()!=10; i++) {
                     try {
                         Thread.sleep(300);
+
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -247,7 +332,9 @@ public class CameraActivity extends AppCompatActivity {
 
 
                     File ff=new File(cacheDir,"image_"+(i+1)+".jpg");
-                    photoFile.add(ff);
+//                    ParcelableFile parcelableFile=new ParcelableFile(ff.getAbsolutePath());
+//                    photoFile.add(parcelableFile);
+
                     ImageCapture.OutputFileOptions outputFileOptions= new ImageCapture.OutputFileOptions.Builder(ff)
                             .build();
 
@@ -255,36 +342,88 @@ public class CameraActivity extends AppCompatActivity {
                     imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-//                            if (!photoFile.isEmpty()){
-//                                //Toast UI thread(메인스레드)에서 실행되어야함
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+"번째 파일리스트에 저장됨", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                            } // if empty
-                            if (photoFile.size()==10){
-                                Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
-                                startActivity(intentPic);
+
+
+                            ParcelableFile parcelableFile = new ParcelableFile(ff.getAbsolutePath());
+                            photoFile.add(parcelableFile);
+
+
+//                            //오옷?
+                            if (photoFile.size()==10) {
+
+
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+                                        intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+                                        Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
+                                        startActivity(intentPic);
+                                    }
+                                });
+
                             }
 
-
+                            //여기 넣어보자
                         }  //onImageSaved
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
                         }
                     });  //callback메서드 통한 takepicture구현2
 
+                    //여기 넣어볼게요
+                    //오옷?
+                    if (photoFile.size()!=0) {
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+
+                                intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+
+                                startActivity(intentPic);
+
+                            }
+                        });
+
+
+                    }  // 10장 리스트 됐으면
+
 
 
                 }//for 반복문
+
+
+                //오옷?
+//                if (photoFile.size()==10) {
+//
+//                    Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+//
+//                    intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+//                    runOnUiThread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//                    startActivity(intentPic);
+//
+//
+//
+//
+//                }
+
+
+
+
 
             } //run함수 구현
         }); //excute 함수
 
 
     }     // startGifCapture 함수 구현
+
 
 
 
