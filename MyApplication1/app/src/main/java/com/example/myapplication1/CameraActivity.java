@@ -1,34 +1,23 @@
 package com.example.myapplication1;
 
-import com.example.myapplication1.ParcelableFile;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
-import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Parcelable;
-import android.util.Log;
-import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.example.myapplication1.gifencoder.AnimatedGifEncoder;
 //CameraInfo, CameraControl 사용
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
-import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -37,13 +26,10 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 import com.google.common.util.concurrent.ListenableFuture;
 //import com.kakao.sdk.common.util.Utility;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -204,6 +190,7 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
+    // 갤러리에서 사진 선택시 실행되는 함수
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
@@ -211,7 +198,8 @@ public class CameraActivity extends AppCompatActivity {
             Uri selectedImageUri = data.getData();
 
             Intent intent = new Intent(this, gifViewer.class);
-            intent.putExtra("imageUri", selectedImageUri.toString());
+            intent.putExtra("imageuri", selectedImageUri.toString());
+            intent.putExtra("hi", "hi");
             startActivity(intent);
         }
     }
@@ -362,7 +350,7 @@ public class CameraActivity extends AppCompatActivity {
         // # 3 여기에
         if (photoFile.size()==10) {
 
-            Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
+            Intent intentPic= new Intent(getApplicationContext(), gifViewer.class);
 
             intentPic.putParcelableArrayListExtra("photoFile", photoFile);
             runOnUiThread(new Runnable() {
