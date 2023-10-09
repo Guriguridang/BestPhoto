@@ -41,6 +41,39 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
+        <LinearLayout
+            android:id="@+id/dialog_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:orientation="horizontal"
+            android:visibility="invisible">
+
+            <ToggleButton
+                android:id="@+id/toggleButton1"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:checked="true"
+                android:text="no timer" />
+
+            <ToggleButton
+                android:id="@+id/toggleButton2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:checked="false"
+                android:text="3s" />
+
+            <ToggleButton
+                android:id="@+id/toggleButton3"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="10s"
+                android:checked="false"/>
+        </LinearLayout>
+
 
     </FrameLayout>
 
@@ -49,7 +82,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center_vertical"
-        android:layout_weight="3.5"
+        android:layout_weight="3"
         android:orientation="horizontal">
 
         <Button
