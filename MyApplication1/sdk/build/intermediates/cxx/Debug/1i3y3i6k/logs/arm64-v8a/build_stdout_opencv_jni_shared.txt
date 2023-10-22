@@ -1,0 +1,2 @@
+ninja: Entering directory `/Users/song-yang-gi/Desktop/BestPhoto/MyApplication1/sdk/.cxx/Debug/1i3y3i6k/arm64-v8a'
+ninja: no work to do.
