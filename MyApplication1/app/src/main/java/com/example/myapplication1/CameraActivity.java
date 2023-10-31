@@ -211,7 +211,8 @@ public class CameraActivity extends AppCompatActivity {
             Uri selectedImageUri = data.getData();
 
             Intent intent = new Intent(this, gifViewer.class);
-            intent.putExtra("imageUri", selectedImageUri.toString());
+
+            intent.putExtra("imageuri", selectedImageUri.toString());
             startActivity(intent);
         }
     }
@@ -264,7 +265,6 @@ public class CameraActivity extends AppCompatActivity {
     }
     //bindPreview 함수 구현
 
-
     public void startGifCapture(ImageCapture imageCapture){
 
         mCameraExecutor = Executors.newSingleThreadExecutor();
@@ -272,7 +272,6 @@ public class CameraActivity extends AppCompatActivity {
         mCameraExecutor.execute(new Runnable() {
             @Override
             public void run() {
-
 
                 for (int i = 0; photoFile.size()!=10; i++) {
                     try {
@@ -293,68 +292,14 @@ public class CameraActivity extends AppCompatActivity {
                     imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-
-
-//                            //오옷 1?
-//                            if (photoFile.size()==10) {
-//
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
-//                                        intentPic.putParcelableArrayListExtra("photoFile", photoFile);
-//                                        Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
-//                                        startActivity(intentPic);
-//                                    }
-//                                });
-//
-//                            }  // #1
-
-                            //여기 넣어보자
                         }  //onImageSaved
                         @Override
                         public void onError(@NonNull ImageCaptureException exception) {
                         }
                     });  //callback메서드 통한 takepicture구현2
 
-                    //여기 넣어볼게요
-                    //오옷 2?
-//                    if (photoFile.size()!=0) {
-//
-//
-//                                Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
-//
-//                                intentPic.putParcelableArrayListExtra("photoFile", photoFile);
-//                                startActivity(intentPic);
-//
-//
-//
-//                    }  // #2
-
-
 
                 }//for 반복문
-
-
-                //오옷?
-//                if (photoFile.size()==10) {
-//
-//                    Intent intentPic= new Intent(getApplicationContext(),gifViewer.class);
-//
-//                    intentPic.putParcelableArrayListExtra("photoFile", photoFile);
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            Toast.makeText(getApplication(),photoFile.size()+"액 부름",Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//                    startActivity(intentPic);
-//
-//                }
-
-
-
-
 
             } //run함수 구현
         }); //excute 함수
@@ -377,12 +322,6 @@ public class CameraActivity extends AppCompatActivity {
 
 
     }     // startGifCapture 함수 구현
-
-
-
-
-
-
 
 
 } //상위 public class
