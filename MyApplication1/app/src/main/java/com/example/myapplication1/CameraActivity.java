@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
@@ -96,6 +97,7 @@ public class CameraActivity extends AppCompatActivity {
         //ArrayList<ParcelableFile> photoFile=new ArrayList<>();   // 여기서 해볼게요. 맨위는 ㅂㄹ
         cacheDir =getCacheDir();
 
+
         //CameraProvider 요청
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
@@ -170,6 +172,8 @@ public class CameraActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
+
+
     @Override
     protected void onStart(){
 
@@ -185,6 +189,7 @@ public class CameraActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(getApplicationContext(),"삭제성공",Toast.LENGTH_SHORT).show();}
+
                     });
                 }
             }
@@ -209,6 +214,7 @@ public class CameraActivity extends AppCompatActivity {
             }
 
         });
+
     }
 
     @Override
@@ -413,10 +419,8 @@ public class CameraActivity extends AppCompatActivity {
 
                             if (photoCount[0] == 10) {
                                 // 사진을 10장 찍었을 때만 gifViewer 액티비티를 엽니다
-
                                 Intent intentPic = new Intent(getApplicationContext(), gifViewer.class);
                                 intentPic.putParcelableArrayListExtra("photoFile", photoFile);
-                                intentPic.setAction("com.example.ACTION_TYPE_1");
                                 startActivity(intentPic);
                             }
                         }

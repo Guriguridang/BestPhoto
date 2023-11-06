@@ -38,6 +38,18 @@ import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
 
 
+// opencv
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.objdetect.Objdetect;
+
+
 public class gifViewer extends AppCompatActivity {
     private ImageView imageView;
     private LinearLayout llImagesContainer;
@@ -124,15 +136,15 @@ public class gifViewer extends AppCompatActivity {
         }
 
         // 이미지 보정
-        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
-        extractFramesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
-                extractEyes(imageView);
-            }
-        });
-        */
+	/*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
+	extractFramesButton.setOnClickListener(new View.onClickListener() {
+	    @Override
+	    public void onClick(View v) {
+	        Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
+		extractEyes(imageView);
+	    }
+	});    
+	*/
         Button btn_next = findViewById(R.id.btnNext);
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,19 +154,19 @@ public class gifViewer extends AppCompatActivity {
                 try {
                     startActivity(intent);
                 }
-                catch (Exception E)
-                {
-                    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+		catch (Exception E)
+		{
+		    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
+		}	
+	    }
+	});
 
-        Button btn_face = findViewById(R.id.btn_face);
-        btn_face.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
-                for(int i=0; i<9; i++) {
+	Button btn_face = findViewById(R.id.btn_face);
+	btn_face.setOnClickListener(new View.OnClickListener() {
+	    @Override
+	    public void onClick(View v){
+		    Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast,LENGTH_SHORT).show();
+		    for(int i=0;i<9;i++) {
                     System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
                     ImageView view = llImagesContainer.findViewById(i);
                     recognizeFace(view);
@@ -278,7 +290,8 @@ public class gifViewer extends AppCompatActivity {
             System.out.println("hi2");
         } catch (IOException e) {
             System.out.println("hi3");
-            e.printStackTrace();
+            e.printStackTrace();   
+
         }
     }
 
