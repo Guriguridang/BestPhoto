@@ -5,19 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.SoundPool;
-import android.media.VolumeShaper;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.view.Display;
-import android.view.Surface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -29,24 +23,18 @@ import android.widget.ToggleButton;
 
 //CameraInfo, CameraControl 사용
 import androidx.camera.core.Camera;
-import androidx.camera.core.CameraControl;
 import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
-import androidx.camera.view.CameraController;
-import androidx.camera.view.LifecycleCameraController;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
-import androidx.viewbinding.ViewBinding;
 
 import com.example.myapplication1.databinding.ActivityCameraBinding;
-import com.example.myapplication1.databinding.ActivityMainBinding;
-import com.example.myapplication1.databinding.FragmentFirstBinding;
 import com.google.common.util.concurrent.ListenableFuture;
 //import com.kakao.sdk.common.util.Utility;
 import java.io.File;
@@ -465,10 +453,6 @@ public class CameraActivity extends AppCompatActivity {
     } // startTimer 메서드
 
 
-
-
-
-
-
-
+    public static class photoedit {
+    }
 } //상위 public class

@@ -63,13 +63,13 @@
             android:text="갤러리"
             android:onClick="onGalleryButtonClicked" />
 
-        <Button
-            android:id="@+id/btnExtractFrames"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="보정하기"
-            />
+<!--        <Button-->
+<!--            android:id="@+id/btnExtractFrames"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_weight="1"-->
+<!--            android:text="보정하기"-->
+<!--            />-->
 
         <Button
             android:id="@+id/btn_face"
@@ -78,7 +78,13 @@
             android:layout_weight="1"
             android:text="얼굴인식"
             />
-
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text=">"
+            />
     </LinearLayout>
 
 

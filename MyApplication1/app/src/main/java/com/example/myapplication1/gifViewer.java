@@ -59,8 +59,6 @@ public class gifViewer extends AppCompatActivity {
 
         if ("com.example.ACTION_TYPE_1".equals(action)) {
             // 촬영
-            //=================
-            // 촬영 intent를 받은 경우
             ArrayList<ParcelableFile> photoFile = intent.getParcelableArrayListExtra("photoFile");
             if (photoFile.size()!=0){
                 runOnUiThread(new Runnable() {
@@ -126,12 +124,28 @@ public class gifViewer extends AppCompatActivity {
         }
 
         // 이미지 보정
-        Button extractFramesButton = findViewById(R.id.btnExtractFrames);
+        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
         extractFramesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
                 extractEyes(imageView);
+            }
+        });
+        */
+        Button btn_next = findViewById(R.id.btnNext);
+        btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), photo.class);
+                try {
+                    startActivity(intent);
+                }
+                catch (Exception E)
+                {
+                    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -148,7 +162,6 @@ public class gifViewer extends AppCompatActivity {
             }
         });
     }
-
 
 
     private void extractEyes(ImageView imageView) {
