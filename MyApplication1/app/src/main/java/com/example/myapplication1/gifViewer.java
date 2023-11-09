@@ -3,6 +3,7 @@ package com.example.myapplication1;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -45,6 +47,8 @@ public class gifViewer extends AppCompatActivity {
     private boolean isOpenCvLoaded = false;
 
     private float dX, dY;
+
+    private Uri tmpUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,18 +88,40 @@ public class gifViewer extends AppCompatActivity {
                 ImageView image = new ImageView(this);
                 // 이미지 설정
                 image.setImageURI(imageUri); // 예시 이미지
-                // 이미지 크기 설정
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
 
-                // 이미지 간격 설정
-                params.setMargins(0, 0, 0, 0);
-                // 이미지뷰에 크기 및 간격 설정 적용
-                image.setLayoutParams(params);
-                // 이미지뷰를 가로 스크롤뷰에 추가
+                // 테스트를 위한 코드
+                tmpUri = imageUri;
+
+
+                // 이미지 리사이징
+//                int targetWidth = 310;
+//                int targetHeight = 100;
+                int targetWidth = 510;
+                int targetHeight = 200;
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imageUriString, options);
+
+                int imageWidth = options.outWidth;
+                int imageHeight = options.outHeight;
+
+                int scaleFactor = Math.min(imageWidth / targetWidth, imageHeight / targetHeight);
+
+                options.inJustDecodeBounds = false;
+                options.inSampleSize = scaleFactor;
+
+                Bitmap resizedBitmap = BitmapFactory.decodeFile(imageUriString, options);
+
+                // 이미지뷰 크기 조정
+                image.setLayoutParams(new LinearLayout.LayoutParams(targetWidth, targetHeight));
+
+                // 리사이징된 이미지를 이미지뷰에 설정
+                image.setImageBitmap(resizedBitmap);
+
+                // LinearLayout에 이미지뷰 추가
                 llImagesContainer.addView(image);
+
 
                 //recognizeFace(image);
                 image.setId(j);
@@ -123,6 +149,8 @@ public class gifViewer extends AppCompatActivity {
             }
         }
 
+        imageView.setImageURI(tmpUri);
+
         // 이미지 보정
         /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
         extractFramesButton.setOnClickListener(new View.OnClickListener() {
@@ -140,7 +168,16 @@ public class gifViewer extends AppCompatActivity {
                 Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), photo.class);
                 try {
-                    startActivity(intent);
+                    Drawable imageDrawable = imageView.getDrawable();
+                    if (imageDrawable instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
+                        // Bitmap을 인텐트에 추가
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        intent.putExtra("image", byteArray);
+                        startActivity(intent);
+                    }
                 }
                 catch (Exception E)
                 {
