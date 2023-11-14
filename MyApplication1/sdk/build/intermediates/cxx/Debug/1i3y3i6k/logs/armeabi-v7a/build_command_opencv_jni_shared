@@ -1,4 +1,0 @@
-/Users/song-yang-gi/Library/Android/sdk/cmake/3.22.1/bin/ninja \
-  -C \
-  /Users/song-yang-gi/Desktop/BestPhoto/MyApplication1/sdk/.cxx/Debug/1i3y3i6k/armeabi-v7a \
-  opencv_jni_shared

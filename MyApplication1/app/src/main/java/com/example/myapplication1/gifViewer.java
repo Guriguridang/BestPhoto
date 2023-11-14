@@ -48,6 +48,8 @@ public class gifViewer extends AppCompatActivity {
 
     private float dX, dY;
 
+    private Uri tmpUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,9 +88,16 @@ public class gifViewer extends AppCompatActivity {
                 ImageView image = new ImageView(this);
                 // 이미지 설정
                 image.setImageURI(imageUri); // 예시 이미지
+
+                // 테스트를 위한 코드
+                tmpUri = imageUri;
+
+
                 // 이미지 리사이징
-                int targetWidth = 400;
-                int targetHeight = 500;
+//                int targetWidth = 310;
+//                int targetHeight = 100;
+                int targetWidth = 510;
+                int targetHeight = 200;
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
@@ -140,6 +149,8 @@ public class gifViewer extends AppCompatActivity {
             }
         }
 
+        imageView.setImageURI(tmpUri);
+
         // 이미지 보정
         /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
         extractFramesButton.setOnClickListener(new View.OnClickListener() {
@@ -162,7 +173,7 @@ public class gifViewer extends AppCompatActivity {
                         Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
                         // Bitmap을 인텐트에 추가
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                         byte[] byteArray = stream.toByteArray();
                         intent.putExtra("image", byteArray);
                         startActivity(intent);
