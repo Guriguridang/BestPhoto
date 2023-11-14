@@ -6,6 +6,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.net.Uri;
@@ -22,12 +24,15 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 //CameraInfo, CameraControl 사용
+import androidx.camera.core.AspectRatio;
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
+import androidx.camera.core.ZoomState;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
@@ -41,6 +46,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -49,15 +55,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class CameraActivity extends AppCompatActivity {
-    private static final String TAG="My T";
-    public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
-    final List<Bitmap> mBitmapList = new ArrayList<>();
-    private int mPictureCount = 0;
-    private static final int PICK_IMAGE_REQUEST = 1;
 
+    public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
+    private static final int PICK_IMAGE_REQUEST = 1;
     private int currentLensFacing=1;
     private Camera camera;
-    ArrayList<ParcelableFile> photoFile=new ArrayList<>();   // 여기서 해볼게요. 맨위는 ㅂㄹ
+    ArrayList<ParcelableFile> photoFile=new ArrayList<>();
+    ArrayList<ParcelableFile> flipFile=new ArrayList<>();
     File cacheDir;
     private SoundPool soundPool;
     private int soundId,soundId1;
@@ -75,11 +79,6 @@ public class CameraActivity extends AppCompatActivity {
         Button galleryButton = findViewById(R.id.btn_gallery);
         galleryButton.setOnClickListener(this::onBtnGalleryClicked);
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            }
-        });
 
         //cameraPermissionCheck onCreate()에서 해야함
         int cameraPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -176,7 +175,7 @@ public class CameraActivity extends AppCompatActivity {
 
         super.onStart();
         for(ParcelableFile file:photoFile){
-            File photo=new File(file.getPath());
+            File photo=new File(file.getAbsolutePath());
 
             if(photo.exists()){
                 boolean deleted=photo.delete();
@@ -202,37 +201,19 @@ public class CameraActivity extends AppCompatActivity {
         super.onResume();
 
         photoFile.clear();  // clear
+        flipFile.clear();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            }
-
-        });
     }
 
     @Override
     protected void onPause(){
         super.onPause();
 
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            }
-        });
-
     }
 
     @Override
     protected void onStop(){
         super.onStop();
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-            }
-        });
     }
 
     // 이미지 저장
@@ -262,10 +243,10 @@ public class CameraActivity extends AppCompatActivity {
     }
 
 
-
     public void bindPreview( @NonNull ProcessCameraProvider cameraProvider, int currentLensFacing) {
 
         Preview preview = new Preview.Builder()//빌더클래스 생성자로 빌더객체 생성
+                .setTargetAspectRatio(AspectRatio.RATIO_4_3)
                 .build(); //객체생성 후 돌려준다.
 
         final PreviewView previewView=findViewById(R.id.previewView);//previewView를 바로 넣을 수 없어서.....
@@ -286,7 +267,6 @@ public class CameraActivity extends AppCompatActivity {
                 .requireLensFacing(currentLensFacing)
                 .build();
 
-
         // Provider
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
@@ -302,19 +282,23 @@ public class CameraActivity extends AppCompatActivity {
         //반환된 camera 객체의 메서드 2개: CameraControl->ListenableFuture, CameraInfo
         camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview, imageCapture);
         CameraInfo cameraInfo = camera.getCameraInfo();
-        camera.getCameraControl().setZoomRatio(2.0f);
 
-        seekBar.setMax(30);
-        seekBar.setMin(5);
-        textView.setText(String.format(Locale.KOREA,"%.1f",(cameraInfo.getZoomState().getValue().getZoomRatio())/2.0f));
+        camera.getCameraControl().setZoomRatio(1.0f);
+        seekBar.setMax(20);  //원래 30
+        seekBar.setMin(10);
+        seekBar.setProgress(10);
+        textView.setText(String.format(Locale.KOREA,"%.1f",(cameraInfo.getZoomState().getValue().getZoomRatio())));
+
+
 
         //seekbar 리스너 등록
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
 
-                camera.getCameraControl().setZoomRatio(progress/5.0f);
+                camera.getCameraControl().setZoomRatio(progress/10.0f);
                 textView.setText(String.format(Locale.KOREA,"%.1f", progress/10.0f));
+
             }
 
             @Override
@@ -323,8 +307,6 @@ public class CameraActivity extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar){}
         });
-
-
 
 
 
@@ -400,8 +382,13 @@ public class CameraActivity extends AppCompatActivity {
                     }
 
                     File ff = new File(cacheDir, "image_" + (i + 1) + ".jpg");
+                    File flippedFile = new File(cacheDir, "flipped_image_" + (i + 1) + ".jpg");
+
                     ParcelableFile parcelableFile = new ParcelableFile(ff.getAbsolutePath());
                     photoFile.add(parcelableFile);
+
+                    ParcelableFile flipparcebleeFile = new ParcelableFile(flippedFile.getAbsolutePath());
+                    flipFile.add(flipparcebleeFile);
 
                     ImageCapture.OutputFileOptions outputFileOptions = new ImageCapture.OutputFileOptions.Builder(ff)
                             .build();
@@ -409,13 +396,29 @@ public class CameraActivity extends AppCompatActivity {
                     imageCapture.takePicture(outputFileOptions, mCameraExecutor, new ImageCapture.OnImageSavedCallback() {
                         @Override
                         public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            if(currentLensFacing==CameraSelector.LENS_FACING_FRONT){
+                                Bitmap org=BitmapFactory.decodeFile(ff.getAbsolutePath());
+                                Bitmap flip=flipBitmap(org);
+
+                                try(FileOutputStream outputStream=new FileOutputStream(flippedFile)) {
+                                    flip.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+                                } catch (IOException e){
+                                    e.printStackTrace();
+                                }
+                            }
+
                             photoCount[0]++; // 사진을 찍은 횟수를 증가시킴
 
                             if (photoCount[0] == 10) {
                                 // 사진을 10장 찍었을 때만 gifViewer 액티비티를 엽니다
 
                                 Intent intentPic = new Intent(getApplicationContext(), gifViewer.class);
-                                intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+                                if(currentLensFacing==CameraSelector.LENS_FACING_FRONT){
+                                    intentPic.putParcelableArrayListExtra("photoFile", flipFile);
+                                }
+                                else {
+                                    intentPic.putParcelableArrayListExtra("photoFile", photoFile);
+                                }
                                 intentPic.setAction("com.example.ACTION_TYPE_1");
                                 startActivity(intentPic);
                             }
@@ -428,6 +431,11 @@ public class CameraActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+    private Bitmap flipBitmap(Bitmap source) {
+        Matrix matrix = new Matrix();
+        matrix.setScale(-1, 1); // Horizontal flip
+        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, false);
     }
 
     public void startTimer(final long sec,ImageCapture imageCapture){
@@ -454,5 +462,15 @@ public class CameraActivity extends AppCompatActivity {
 
 
     public static class photoedit {
+    }
+
+    private void saveBitmapToFile(Bitmap bitmap, File file){
+        try(FileOutputStream fos=new FileOutputStream(file)){
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,fos);
+            fos.flush();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+
     }
 } //상위 public class
