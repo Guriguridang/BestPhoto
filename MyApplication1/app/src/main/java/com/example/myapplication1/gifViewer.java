@@ -3,6 +3,7 @@ package com.example.myapplication1;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,18 +35,6 @@ import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-import org.opencv.objdetect.Objdetect;
-
-
-// opencv
-
-import org.opencv.android.Utils;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.opencv.objdetect.Objdetect;
@@ -96,18 +86,33 @@ public class gifViewer extends AppCompatActivity {
                 ImageView image = new ImageView(this);
                 // 이미지 설정
                 image.setImageURI(imageUri); // 예시 이미지
-                // 이미지 크기 설정
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
+                // 이미지 리사이징
+                int targetWidth = 400;
+                int targetHeight = 500;
 
-                // 이미지 간격 설정
-                params.setMargins(0, 0, 0, 0);
-                // 이미지뷰에 크기 및 간격 설정 적용
-                image.setLayoutParams(params);
-                // 이미지뷰를 가로 스크롤뷰에 추가
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imageUriString, options);
+
+                int imageWidth = options.outWidth;
+                int imageHeight = options.outHeight;
+
+                int scaleFactor = Math.min(imageWidth / targetWidth, imageHeight / targetHeight);
+
+                options.inJustDecodeBounds = false;
+                options.inSampleSize = scaleFactor;
+
+                Bitmap resizedBitmap = BitmapFactory.decodeFile(imageUriString, options);
+
+                // 이미지뷰 크기 조정
+                image.setLayoutParams(new LinearLayout.LayoutParams(targetWidth, targetHeight));
+
+                // 리사이징된 이미지를 이미지뷰에 설정
+                image.setImageBitmap(resizedBitmap);
+
+                // LinearLayout에 이미지뷰 추가
                 llImagesContainer.addView(image);
+
 
                 //recognizeFace(image);
                 image.setId(j);
@@ -136,15 +141,15 @@ public class gifViewer extends AppCompatActivity {
         }
 
         // 이미지 보정
-	/*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
-	extractFramesButton.setOnClickListener(new View.onClickListener() {
-	    @Override
-	    public void onClick(View v) {
-	        Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
-		extractEyes(imageView);
-	    }
-	});    
-	*/
+        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
+        extractFramesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
+                extractEyes(imageView);
+            }
+        });
+        */
         Button btn_next = findViewById(R.id.btnNext);
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -152,21 +157,30 @@ public class gifViewer extends AppCompatActivity {
                 Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), photo.class);
                 try {
-                    startActivity(intent);
+                    Drawable imageDrawable = imageView.getDrawable();
+                    if (imageDrawable instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
+                        // Bitmap을 인텐트에 추가
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        intent.putExtra("image", byteArray);
+                        startActivity(intent);
+                    }
                 }
-		catch (Exception E)
-		{
-		    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
-		}	
-	    }
-	});
+                catch (Exception E)
+                {
+                    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
-	Button btn_face = findViewById(R.id.btn_face);
-	btn_face.setOnClickListener(new View.OnClickListener() {
-	    @Override
-	    public void onClick(View v){
-		    Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast,LENGTH_SHORT).show();
-		    for(int i=0;i<9;i++) {
+        Button btn_face = findViewById(R.id.btn_face);
+        btn_face.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
+                for(int i=0; i<9; i++) {
                     System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
                     ImageView view = llImagesContainer.findViewById(i);
                     recognizeFace(view);
@@ -290,8 +304,7 @@ public class gifViewer extends AppCompatActivity {
             System.out.println("hi2");
         } catch (IOException e) {
             System.out.println("hi3");
-            e.printStackTrace();   
-
+            e.printStackTrace();
         }
     }
 
