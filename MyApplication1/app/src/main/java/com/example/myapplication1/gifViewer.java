@@ -1,8 +1,10 @@
 package com.example.myapplication1;
 
-import com.example.myapplication1.ParcelableFile;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.HorizontalScrollView;
@@ -18,16 +21,13 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import pl.droidsonroids.gif.GifDrawable;
-
-
+import java.util.ArrayList;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -37,11 +37,18 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.objdetect.Objdetect;
 
 
 public class gifViewer extends AppCompatActivity {
     private ImageView imageView;
     private LinearLayout llImagesContainer;
+
+    private boolean isOpenCvLoaded = false;
+
+    private float dX, dY;
+
+    private Uri tmpUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,72 +58,194 @@ public class gifViewer extends AppCompatActivity {
         HorizontalScrollView horizontalScrollView = findViewById(R.id.horizontalScrollView);
         llImagesContainer = findViewById(R.id.llImagesContainer);
 
+        Intent intent= getIntent();
+        String action=intent.getAction();
 
-        // 갤러리 인텐트 받은 경우
-        String imageUriString = getIntent().getStringExtra("imageuri");
-        System.out.println("uri ====" + imageUriString);
+        if ("com.example.ACTION_TYPE_1".equals(action)) {
+            // 촬영
+            ArrayList<ParcelableFile> photoFile = intent.getParcelableArrayListExtra("photoFile");
+            if (photoFile.size()!=0){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+" 장 찍힘", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+            int j=0;
+            for (ParcelableFile photo: photoFile){
+                String imageUriString = photo.getAbsolutePath();
+                System.out.println("uri from 캡쳐 ====" + imageUriString);
+                Uri imageUri = Uri.parse(imageUriString);
 
-        Uri imageUri = Uri.parse(imageUriString);
-        // 이미지 URI를 ImageView에 설정하여 gif 이미지 표시
-        //        Glide.with(this).asGif().load(imageUri).into(imageView);
-        Glide.with(this).load(imageUri).into(imageView);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "싸이즈"+imageUri, Toast.LENGTH_SHORT).show();
+
+                    }
+                });
+                ImageView image = new ImageView(this);
+                // 이미지 설정
+                image.setImageURI(imageUri); // 예시 이미지
+
+                // 테스트를 위한 코드
+                tmpUri = imageUri;
+
+
+                // 이미지 리사이징
+//                int targetWidth = 310;
+//                int targetHeight = 100;
+                int targetWidth = 510;
+                int targetHeight = 200;
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imageUriString, options);
+
+                int imageWidth = options.outWidth;
+                int imageHeight = options.outHeight;
+
+                int scaleFactor = Math.min(imageWidth / targetWidth, imageHeight / targetHeight);
+
+                options.inJustDecodeBounds = false;
+                options.inSampleSize = scaleFactor;
+
+                Bitmap resizedBitmap = BitmapFactory.decodeFile(imageUriString, options);
+
+                // 이미지뷰 크기 조정
+                image.setLayoutParams(new LinearLayout.LayoutParams(targetWidth, targetHeight));
+
+                // 리사이징된 이미지를 이미지뷰에 설정
+                image.setImageBitmap(resizedBitmap);
+
+                // LinearLayout에 이미지뷰 추가
+                llImagesContainer.addView(image);
+
+
+                //recognizeFace(image);
+                image.setId(j);
+                j++;
+                if (j==10) {
+                    break;
+                }
+
+                // n번 째 이미지 추출 이벤트
+                image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getApplicationContext(), "이미지를 선택했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } else if ("com.example.ACTION_TYPE_2".equals(action)) {
+            // 갤러리
+            String imageUriString = getIntent().getStringExtra("imageuri");
+            System.out.println("uri ====" + imageUriString);
+
+            if (imageUriString != null) {
+                Uri imageUri = Uri.parse(imageUriString);
+                Glide.with(this).load(imageUri).into(imageView);
+            }
+        }
+
+        imageView.setImageURI(tmpUri);
 
         // 이미지 보정
-        Button extractFramesButton = findViewById(R.id.btnExtractFrames);
+        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
         extractFramesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "이미지를 보정합니다", Toast.LENGTH_SHORT).show();
+                Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
                 extractEyes(imageView);
             }
         });
+        */
+        Button btn_next = findViewById(R.id.btnNext);
+        btn_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getApplicationContext(), photo.class);
+                try {
+                    Drawable imageDrawable = imageView.getDrawable();
+                    if (imageDrawable instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
+                        // Bitmap을 인텐트에 추가
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        intent.putExtra("image", byteArray);
+                        startActivity(intent);
+                    }
+                }
+                catch (Exception E)
+                {
+                    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
+        Button btn_face = findViewById(R.id.btn_face);
+        btn_face.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
+                for(int i=0; i<9; i++) {
+                    System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
+                    ImageView view = llImagesContainer.findViewById(i);
+                    recognizeFace(view);
+                }
+            }
+        });
     }
+
+
     private void extractEyes(ImageView imageView) {
         try {
             System.loadLibrary("opencv_java4");
-            // haarcascade_frontalface_default.xml 파일 로드
+            //haarcascade_frontalface_default 불러오기 - 얼굴객체 인식을 위한 머신러닝 데이터셋이다.
             Context context = getApplicationContext();
-            InputStream faceCascadeInputStream = context.getAssets().open("haarcascade_frontalface_default.xml");
+            InputStream is3 = context.getAssets().open("haarcascade_frontalface_default.xml");
 
-            // InputStream을 앱의 캐시 디렉터리의 temporary file로 복사
+            // InputStream을 앱의 캐시디렉토리의 temporary file로 복사
             File cascadeDir = context.getDir("cascade", Context.MODE_PRIVATE);
-            File faceCascadeFile = new File(cascadeDir, "haarcascade_frontalface_default.xml");
-            FileOutputStream os = new FileOutputStream(faceCascadeFile);
+            File cascadeFile = new File(cascadeDir, "haarcascade_frontalface_default.xml");
+            FileOutputStream os = new FileOutputStream(cascadeFile);
 
             byte[] buffer = new byte[4096];
             int bytesRead;
-            while ((bytesRead = faceCascadeInputStream.read(buffer)) != -1) {
+            while ((bytesRead = is3.read(buffer)) != -1) {
                 os.write(buffer, 0, bytesRead);
             }
 
             os.close();
+            CascadeClassifier faceCascade = new CascadeClassifier(cascadeFile.getAbsolutePath());
 
-            // faceCascade 객체 생성
-            CascadeClassifier faceCascade = new CascadeClassifier(faceCascadeFile.getAbsolutePath());
 
-            // 갤러리에서 불러온 이미지를 얼굴 객체를 인식하기 위해 Mat 형식으로 변환
+            // 갤러리에서 불러온 이미지를 얼굴객체를 인식하기 위해 Mat 형식으로 변환
             Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
             Mat originalMatImg = new Mat();
             Utils.bitmapToMat(bitmap, originalMatImg);
 
-            // 이미지를 분석하기 위해 흑백 이미지로 변환
-            Mat gray = new Mat();
-            Imgproc.cvtColor(originalMatImg, gray, Imgproc.COLOR_RGBA2GRAY);
+            // 이미지를 분석하기 위해 흑백이미지로 변환
+            Mat gray2 = new Mat();
+            Imgproc.cvtColor(originalMatImg, gray2, Imgproc.COLOR_RGBA2GRAY);
 
-            // 얼굴을 검출하여 faces에 저장
-            MatOfRect faces = new MatOfRect();
-            faceCascade.detectMultiScale(gray, faces, 1.3, 5);
+            MatOfRect faces;
+            faces = new MatOfRect();
 
-            // 검출된 얼굴에 대해 눈을 검출하고 사각형으로 표시
-            for (Rect faceRect : faces.toArray()) {
-                // 얼굴 영역에 하얀색 사각형 그리기
-                Imgproc.rectangle(originalMatImg, faceRect.tl(), faceRect.br(), new Scalar(255, 255, 255), 2);
-                Mat faceROI = new Mat(gray, faceRect);
-                detectEyes(faceROI, originalMatImg);
+            // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
+            faceCascade.detectMultiScale(gray2, faces, 1.3, 5);
+
+            // 인식된 얼굴에 사각형으로 표시
+            for (Rect rect : faces.toArray()) {
+                System.out.println("인식된 얼굴 객체 좌표 :");
+                System.out.println(rect);
+                Imgproc.rectangle(originalMatImg, rect.tl(), rect.br(), new Scalar(255, 0, 0), 8);
             }
-            // 결과를 ImageView에 표시
-            Bitmap resultBitmapImg = Bitmap.createBitmap(originalMatImg.cols(), originalMatImg.rows(), Bitmap.Config.ARGB_8888);
+            // imageView2에 결과를 보여주기 위한 처리
+            Bitmap resultBitmapImg = Bitmap.createBitmap(gray2.cols(), gray2.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(originalMatImg, resultBitmapImg);
             imageView.setImageBitmap(resultBitmapImg);
         } catch (IOException e) {
@@ -124,49 +253,12 @@ public class gifViewer extends AppCompatActivity {
         }
     }
 
-    private void detectEyes(Mat faceROI, Mat originalMatImg) throws IOException {
-        // haarcascade_eye.xml 파일 로드
-        Context context = getApplicationContext();
-        InputStream eyeCascadeInputStream = context.getResources().openRawResource(R.raw.haarcascade_eye);
 
-        // InputStream을 앱의 캐시 디렉터리의 temporary file로 복사
-        File cascadeDir = context.getDir("cascade", Context.MODE_PRIVATE);
-        File eyeCascadeFile = new File(cascadeDir, "haarcascade_eye.xml");
-        FileOutputStream os = new FileOutputStream(eyeCascadeFile);
-
-        byte[] buffer = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = eyeCascadeInputStream.read(buffer)) != -1) {
-            os.write(buffer, 0, bytesRead);
-        }
-
-        os.close();
-
-        // eyeCascade 객체 생성
-        CascadeClassifier eyeCascade = new CascadeClassifier(eyeCascadeFile.getAbsolutePath());
-
-        MatOfRect eyes = new MatOfRect();
-        eyeCascade.detectMultiScale(faceROI, eyes, 1.1, 2, 0, new Size(30, 30));
-
-        // 검출된 눈에 대해 빨간색 사각형 표시
-        for (Rect eyeRect : eyes.toArray())
-        {
-            // 상대 좌표로 변환
-            float relativeEyeRectLeft = (float) eyeRect.tl().x / faceROI.cols();
-            float relativeEyeRectTop = (float) eyeRect.tl().y / faceROI.rows();
-            float relativeEyeRectRight = (float) eyeRect.br().x / faceROI.cols();
-            float relativeEyeRectBottom = (float) eyeRect.br().y / faceROI.rows();
-
-            // 상대 좌표로 변환된 눈의 좌표에 빨간색 사각형 그리기
-            Point relativeEyeRectTl = new Point(relativeEyeRectLeft * originalMatImg.cols(), relativeEyeRectTop * originalMatImg.rows());
-            Point relativeEyeRectBr = new Point(relativeEyeRectRight * originalMatImg.cols(), relativeEyeRectBottom * originalMatImg.rows());
-            Imgproc.rectangle(originalMatImg, relativeEyeRectTl, relativeEyeRectBr, new Scalar(255, 0, 0), 2);
-        }
-
-
+    // "재촬영" 버튼 클릭 이벤트 처리 (@선영님)
+    public void onCaptureButtonClicked(View view) {
+        Intent intent = new Intent(this, CameraActivity.class);
+        startActivity(intent);
     }
-
-
 
     private void recognizeFace(ImageView imageView) {
         try {
@@ -227,13 +319,7 @@ public class gifViewer extends AppCompatActivity {
         }
     }
 
-
-
-
-
-
-
-    // btn_gallery : 갤러리 재선택
+    // btn_gallery : 프레임 추출할 gif 재선택
     public void onGalleryButtonClicked(View view) {
 
     }

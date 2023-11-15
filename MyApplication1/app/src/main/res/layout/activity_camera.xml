@@ -1,77 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".CameraActivity">
-
-    <LinearLayout
-        android:id="@+id/top"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1.5"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="timer" />
-
-        <Button
-            android:id="@+id/other"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="other" />
-    </LinearLayout>
-
     <FrameLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="10">
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
 
         <androidx.camera.view.PreviewView
             android:id="@+id/previewView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_gravity="fill_horizontal"
+            app:scaleType="fitCenter">
 
+        </androidx.camera.view.PreviewView>
 
     </FrameLayout>
-
     <LinearLayout
-        android:id="@+id/bottom"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="3.5"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/top"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_gravity="top"
+            android:background="#81F9F7F7"
+            android:gravity="top"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/timer"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="start"
+                android:layout_marginStart="60dp"
+                android:layout_marginTop="30dp"
+                android:layout_marginEnd="0dp"
+                android:background="@drawable/time"
+                android:gravity="center_horizontal|center_vertical"
+                android:text="f"
+                android:textColor="#00FFFFFF" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_gravity="right"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="40dp"
+                android:layout_weight="4">
+
+
+                <SeekBar
+                    android:id="@+id/seekBar"
+                    android:layout_width="250dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="5dp"
+                    android:progressDrawable="@drawable/seek_bar"
+                    android:thumb="@drawable/seek_thumb"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/textView2"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/textView2"
+                    android:layout_width="80dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="10dp"
+                    android:background="#C1F8F3F3"
+                    android:gravity="center"
+                    android:text="1.0"
+                    android:textAlignment="center"
+                    android:textColor="#100000"
+                    android:textSize="34sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/seekBar"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dialog_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="#81F9F7F7"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            tools:visibility="invisible">
+
+            <ToggleButton
+                android:id="@+id/toggleButton1"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="30dp"
+                android:background="@drawable/sec0"
+                android:checked="true"
+                android:text=""
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/toggleButton2"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/sec3"
+                android:checked="false"
+                android:text=""
+                android:textOff=""
+                android:textOn="" />
+
+            <ToggleButton
+                android:id="@+id/toggleButton3"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/sec7"
+                android:checked="false"
+                android:text=""
+                android:textOff=""
+                android:textOn="" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_gravity="bottom"
+        android:background="#00F9F7F7">
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+        </FrameLayout>
 
         <Button
             android:id="@+id/btn_gallery"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/gal_b"
+            android:onClick="onGalleryButtonClicked"
             android:text="gallery"
-            android:onClick="onBtnGalleryClicked"/>
+            android:textColor="#00FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/capture"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/capture"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="capture" />
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/capture_btn"
+            android:text="capture"
+            android:textColor="#00000000"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/change"
+            app:layout_constraintStart_toEndOf="@id/btn_gallery"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/change"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="change" />
-    </LinearLayout>
-</LinearLayout>
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="@drawable/change"
+            android:text="change"
+            android:textColor="#00FFFFFF"
+            android:textColorHighlight="#675656"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/capture"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
+</FrameLayout>

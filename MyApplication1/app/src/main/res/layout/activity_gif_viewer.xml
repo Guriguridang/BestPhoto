@@ -18,6 +18,8 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <HorizontalScrollView
+        android:contentDescription="하고 싶은 설명"
+
         android:id="@+id/horizontalScrollView"
         android:layout_width="match_parent"
         android:layout_height="300dp"
@@ -61,14 +63,30 @@
             android:text="갤러리"
             android:onClick="onGalleryButtonClicked" />
 
+        <!--        <Button-->
+        <!--            android:id="@+id/btnExtractFrames"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="보정하기"-->
+        <!--            />-->
+
         <Button
-            android:id="@+id/btnExtractFrames"
+            android:id="@+id/btn_face"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="꾸미기"
+            android:text="얼굴인식"
             />
-
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:text=">"
+            />
     </LinearLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
