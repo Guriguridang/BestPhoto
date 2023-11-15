@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Pressed 상태일 때 -->
+    <item android:state_pressed="true">
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF" /> <!-- 눌린 상태의 배경 색상 설정 (녹색) -->
+            <corners android:radius="50dp"/>
+            <stroke
+                android:width="7dp"
+                android:color="#3F72AF"/>
+        </shape>
+    </item>
+    <!-- 일반 상태일 때 -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#FFFFFF" /> <!-- 일반 상태의 배경 색상 설정 (파란색) -->
+            <corners android:radius="50dp"/>
+            <stroke
+                android:width="7dp"
+                android:color="#112D4E"/>
+        </shape>
+    </item>
+</selector>
