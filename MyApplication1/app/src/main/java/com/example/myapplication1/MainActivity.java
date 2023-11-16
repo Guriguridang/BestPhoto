@@ -45,13 +45,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btn_swap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(MainActivity.this, FaceSwapActivity.class);
-                startActivity(intent);
-            }
-        });
 
 
 

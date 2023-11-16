@@ -49,7 +49,7 @@ public class photo extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            byte[] byteArray = intent.getByteArrayExtra("image");
+            byte[] byteArray = intent.getByteArrayExtra("img");
 
             if (byteArray != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
