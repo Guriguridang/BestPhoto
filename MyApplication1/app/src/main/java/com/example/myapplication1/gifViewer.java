@@ -64,6 +64,8 @@ public class gifViewer extends AppCompatActivity {
 
     Integer numOfFace=0;
 
+    double scaleFactor2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,7 +114,7 @@ public class gifViewer extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+" 장 찍힘", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "사진 "+photoFile.size()+" 장 찍힘", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -125,7 +127,7 @@ public class gifViewer extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(getApplicationContext(), "싸이즈"+imageUri, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "싸이즈"+imageUri, Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -133,24 +135,32 @@ public class gifViewer extends AppCompatActivity {
                 // 이미지 설정
                 image.setImageURI(imageUri); // 예시 이미지
 
-                // 테스트를 위한 코드
-                tmpUri = imageUri;
-
 
                 // 이미지 리사이징. 비율은 자동조절됨
-//                int targetWidth = 310;
-//                int targetHeight = 100;
-                int targetWidth = 700;
-                int targetHeight = 400;
+
+//                int targetWidth = 1000;
+//                int targetHeight = 600;
+                // 원본보다 작게 유지
+                int targetWidth = 1000; //  800이 딱 붙는것. 즉 좌우로 각각 100씩 여
+                int targetHeight = 600;
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
                 BitmapFactory.decodeFile(imageUriString, options);
 
+                // 현재 내 맥북은 960/1280
                 int imageWidth = options.outWidth;
                 int imageHeight = options.outHeight;
 
-                int scaleFactor = Math.min(imageWidth / targetWidth, imageHeight / targetHeight);
+                // 무조건 1이 나옴
+                int scaleFactor = Math.min( (imageWidth / targetWidth), (imageHeight / targetHeight));
+
+
+                if (j==0) {
+                    scaleFactor2 = ((double)imageHeight / (double)targetHeight);
+                }
+
+                System.out.println("scaleFactor#####" + scaleFactor2);
 
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = scaleFactor;
@@ -172,12 +182,13 @@ public class gifViewer extends AppCompatActivity {
 
 
                 // n번 째 이미지 추출 이벤트
-                image.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(getApplicationContext(), "이미지를 선택했습니다.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+//                image.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        Toast.makeText(getApplicationContext(), "이미지를 선택했습니다.", Toast.LENGTH_SHORT).show();
+//
+//                    }
+//                });
 
 
                 // 얼굴 인식
@@ -195,9 +206,9 @@ public class gifViewer extends AppCompatActivity {
 
 
 
-
                 // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
-                faceCascade.detectMultiScale(gray, faces, 1.11, 5);
+                //faceCascade.detectMultiScale(gray, faces, 1.11, 5);
+                faceCascade.detectMultiScale(gray, faces, 1.11, 9);
 
 
                 // 첫번째 프레임은 디폴트이미지이기 때문에 전역으로 백업
@@ -236,8 +247,8 @@ public class gifViewer extends AppCompatActivity {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         int action = event.getAction();
-                        float curX = event.getX();  //터치한 곳의 X좌표
-                        float curY = event.getY();  // Y좌표
+                        double curX = event.getX();  //터치한 곳의 X좌표
+                        double curY = event.getY();  // Y좌표
 
                         // 이거 위에서 설정 되어야하는데 일로 오면 0으로 적용되는 문제
                         //numOfFace = 1;
@@ -254,8 +265,17 @@ public class gifViewer extends AppCompatActivity {
                                 System.out.println("터치좌표");
                                 System.out.println(curY);
                                 System.out.println(curX);
+                                System.out.println("수정후 터치좌표");
+
+
+                                curY = (curY*scaleFactor2);
+                                curX = ((curX-100)*scaleFactor2);
+
+                                System.out.println("수정후 터치좌표");
+                                System.out.println(curY);
+                                System.out.println(curX);
+
                                 System.out.println("얼굴좌표");
-                                //s.height가  328223 인 문제.
                                 System.out.println(s.y + "부터 " + (s.y + s.height));
                                 System.out.println(s.x + "부터 " + (s.x + s.width));
 
@@ -267,10 +287,12 @@ public class gifViewer extends AppCompatActivity {
                                     int subT = 10000;
                                     int idx=0;
 
-                                    for (int j = 0; j < 1; j++) {
+                                    for (int j = 0; j < numOfFace; j++) {
                                         Rect targetTmp = targetfaces.toArray()[j]; // Get the target face rectangle
                                         int targetX = targetTmp.x;
+                                        //int targetY = targetTmp.y;
                                         int targetY = targetTmp.y;
+
                                         int sub = Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
                                         if (sub < subT) {
                                             subT = sub;
@@ -393,40 +415,43 @@ public class gifViewer extends AppCompatActivity {
         Button btn_next = findViewById(R.id.btnNext);
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
+            public void onClick(View view) {
+                ImageView imgView=findViewById(R.id.imageView);
                 Intent intent = new Intent(getApplicationContext(), photo.class);
+                //startActivity(intent);
                 try {
-                    Drawable imageDrawable = imageView.getDrawable();
-                    if (imageDrawable instanceof BitmapDrawable) {
-                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
-                        // Bitmap을 인텐트에 추가
+                    if(imgView.getDrawable() instanceof BitmapDrawable){
+                        Bitmap bitmap=((BitmapDrawable) imgView.getDrawable()).getBitmap();
                         ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
                         byte[] byteArray = stream.toByteArray();
-                        intent.putExtra("image", byteArray);
+
+                        intent.putExtra("img", byteArray);
                         startActivity(intent);
                     }
+
                 }
-                catch (Exception E)
-                {
-                    Toast.makeText(gifViewer.this, E.toString(), Toast.LENGTH_SHORT).show();
+                catch (Exception e){
+                    Toast.makeText(gifViewer.this,"byte=0",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(gifViewer.this,e.toString(),Toast.LENGTH_SHORT).show();
+                    System.out.println(e.toString());
                 }
+
             }
         });
 
-        Button btn_face = findViewById(R.id.btn_face);
-        btn_face.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
-                for(int i=0; i<9; i++) {
-                    //System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
-                    ImageView view = llImagesContainer.findViewById(i);
-                    recognizeFace(view);
-                }
-            }
-        });
+//        Button btn_face = findViewById(R.id.btn_face);
+//        btn_face.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
+//                for(int i=0; i<9; i++) {
+//                    //System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
+//                    ImageView view = llImagesContainer.findViewById(i);
+//                    recognizeFace(view);
+//                }
+//            }
+//        });
     }
 
 
@@ -489,62 +514,62 @@ public class gifViewer extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void recognizeFace(ImageView imageView) {
-        try {
-            System.loadLibrary("opencv_java4");
-            //haarcascade_frontalface_default 불러오기 - 얼굴객체 인식을 위한 머신러닝 데이터셋이다.
-            Context context = getApplicationContext();
-            InputStream is3 = context.getAssets().open("haarcascade_frontalface_default.xml");
-
-            // InputStream을 앱의 캐시디렉토리의 temporary file로 복사
-            File cascadeDir = context.getDir("cascade", Context.MODE_PRIVATE);
-            File cascadeFile = new File(cascadeDir, "haarcascade_frontalface_default.xml");
-            FileOutputStream os = new FileOutputStream(cascadeFile);
-
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = is3.read(buffer)) != -1) {
-                os.write(buffer, 0, bytesRead);
-            }
-
-            os.close();
-            // /data/user/0/com.example.myapplication1/app_cascade/haarcascade_frontalface_default.xml
-            // temporary file path를 이용해서 CascadeClassifier 생성
-            CascadeClassifier faceCascade = new CascadeClassifier(cascadeFile.getAbsolutePath());
-
-
-            // 갤러리에서 불러온 이미지를 얼굴객체를 인식하기 위해 Mat 형식으로 변환
-            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-            Mat originalMatImg = new Mat();
-            Utils.bitmapToMat(bitmap, originalMatImg);
-
-            // 이미지를 분석하기 위해 흑백이미지로 변환
-            Mat gray2 = new Mat();
-            Imgproc.cvtColor(originalMatImg, gray2, Imgproc.COLOR_RGBA2GRAY);
-
-            MatOfRect faces;
-            faces = new MatOfRect();
-
-            // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
-            faceCascade.detectMultiScale(gray2, faces, 1.3, 5);
-
-            // 인식된 얼굴에 사각형으로 표시
-            for (Rect rect : faces.toArray()) {
-                System.out.println("인식된 얼굴 객체 좌표 :");
-                System.out.println(rect);
-                Imgproc.rectangle(originalMatImg, rect.tl(), rect.br(), new Scalar(255, 0, 0), 8);
-            }
-
-            // imageView2에 결과를 보여주기 위한 처리
-            Bitmap resultBitmapImg = Bitmap.createBitmap(gray2.cols(), gray2.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(originalMatImg, resultBitmapImg);
-            imageView.setImageBitmap(resultBitmapImg);
-            System.out.println("hi2");
-        } catch (IOException e) {
-            System.out.println("hi3");
-            e.printStackTrace();
-        }
-    }
+//    private void recognizeFace(ImageView imageView) {
+//        try {
+//            System.loadLibrary("opencv_java4");
+//            //haarcascade_frontalface_default 불러오기 - 얼굴객체 인식을 위한 머신러닝 데이터셋이다.
+//            Context context = getApplicationContext();
+//            InputStream is3 = context.getAssets().open("haarcascade_frontalface_default.xml");
+//
+//            // InputStream을 앱의 캐시디렉토리의 temporary file로 복사
+//            File cascadeDir = context.getDir("cascade", Context.MODE_PRIVATE);
+//            File cascadeFile = new File(cascadeDir, "haarcascade_frontalface_default.xml");
+//            FileOutputStream os = new FileOutputStream(cascadeFile);
+//
+//            byte[] buffer = new byte[4096];
+//            int bytesRead;
+//            while ((bytesRead = is3.read(buffer)) != -1) {
+//                os.write(buffer, 0, bytesRead);
+//            }
+//
+//            os.close();
+//            // /data/user/0/com.example.myapplication1/app_cascade/haarcascade_frontalface_default.xml
+//            // temporary file path를 이용해서 CascadeClassifier 생성
+//            CascadeClassifier faceCascade = new CascadeClassifier(cascadeFile.getAbsolutePath());
+//
+//
+//            // 갤러리에서 불러온 이미지를 얼굴객체를 인식하기 위해 Mat 형식으로 변환
+//            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+//            Mat originalMatImg = new Mat();
+//            Utils.bitmapToMat(bitmap, originalMatImg);
+//
+//            // 이미지를 분석하기 위해 흑백이미지로 변환
+//            Mat gray2 = new Mat();
+//            Imgproc.cvtColor(originalMatImg, gray2, Imgproc.COLOR_RGBA2GRAY);
+//
+//            MatOfRect faces;
+//            faces = new MatOfRect();
+//
+//            // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
+//            faceCascade.detectMultiScale(gray2, faces, 1.3, 5);
+//
+//            // 인식된 얼굴에 사각형으로 표시
+//            for (Rect rect : faces.toArray()) {
+//                System.out.println("인식된 얼굴 객체 좌표 :");
+//                System.out.println(rect);
+//                Imgproc.rectangle(originalMatImg, rect.tl(), rect.br(), new Scalar(255, 0, 0), 8);
+//            }
+//
+//            // imageView2에 결과를 보여주기 위한 처리
+//            Bitmap resultBitmapImg = Bitmap.createBitmap(gray2.cols(), gray2.rows(), Bitmap.Config.ARGB_8888);
+//            Utils.matToBitmap(originalMatImg, resultBitmapImg);
+//            imageView.setImageBitmap(resultBitmapImg);
+//            System.out.println("hi2");
+//        } catch (IOException e) {
+//            System.out.println("hi3");
+//            e.printStackTrace();
+//        }
+//    }
 
     // btn_gallery : 프레임 추출할 gif 재선택
     public void onGalleryButtonClicked(View view) {

@@ -7,10 +7,13 @@
     tools:context=".gifViewer">
 
 
+<!--    android:layout_width="310dp"-->
+<!--    android:layout_height="290dp"-->
+
     <ImageView
         android:id="@+id/m_imageView"
-        android:layout_width="310dp"
-        android:layout_height="290dp"
+        android:layout_width="500dp"
+        android:layout_height="340dp"
         android:layout_marginTop="30dp"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toTopOf="parent"
@@ -18,14 +21,16 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <HorizontalScrollView
-        android:contentDescription="하고 싶은 설명"
-
         android:id="@+id/horizontalScrollView"
+
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_below="@id/m_imageView"
-        app:layout_constraintTop_toBottomOf="@id/m_imageView"
-        android:fillViewport="true">
+        android:contentDescription="하고 싶은 설명"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/llButtons"
+        app:layout_constraintTop_toBottomOf="@id/m_imageView">
+
 
         <LinearLayout
             android:id="@+id/llImagesContainer"
@@ -71,13 +76,7 @@
         <!--            android:text="보정하기"-->
         <!--            />-->
 
-        <Button
-            android:id="@+id/btn_face"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="얼굴인식"
-            />
+
         <Button
             android:id="@+id/btnNext"
             android:layout_width="0dp"
