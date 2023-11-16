@@ -438,7 +438,7 @@ public class gifViewer extends AppCompatActivity {
                     bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
                     byte[] byteArray = stream.toByteArray();
 
-                    intent.putExtra("img", byteArray);
+                    intent.putExtra("image", byteArray);
                     startActivity(intent);
 
 

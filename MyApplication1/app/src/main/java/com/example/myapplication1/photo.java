@@ -1,6 +1,8 @@
 package com.example.myapplication1;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,7 +10,11 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -28,10 +34,14 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Locale;
 
 public class photo extends AppCompatActivity {
     private ImageView imageView;
@@ -40,21 +50,30 @@ public class photo extends AppCompatActivity {
     private boolean isDragging = false;
 
     private Matrix imageMatrix = new Matrix();
+    private byte[] byteArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
         imageView = findViewById(R.id.image);
+        Button btn_save=findViewById(R.id.btn_savegallery);
 
         Intent intent = getIntent();
         if (intent != null) {
-            byte[] byteArray = intent.getByteArrayExtra("img");
+            byteArray = intent.getByteArrayExtra("image");
 
             if (byteArray != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
                 ImageView imageView = findViewById(R.id.image);
                 imageView.setImageBitmap(bitmap);
+
+                btn_save.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        saveFile();
+                    }
+                });
             }
         }
         Button btn_edit = findViewById(R.id.btn_editphoto);
@@ -105,6 +124,9 @@ public class photo extends AppCompatActivity {
                 return true;
             }
         });
+
+
+
 
     }
 
@@ -166,6 +188,44 @@ public class photo extends AppCompatActivity {
             imageView.setImageBitmap(resultBitmapImg);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void saveFile() {
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.KOREA);
+        String timestamp=sdf.format(new Date());
+
+        String filename="image"+timestamp+".jpg";
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, filename);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/*");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put( MediaStore.Images.Media.IS_PENDING, 1);
+        }
+
+        ContentResolver contentResolver = getContentResolver();
+        Uri item = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            ParcelFileDescriptor pdf = contentResolver.openFileDescriptor(item, "w", null);
+            FileOutputStream fos = new FileOutputStream(pdf.getFileDescriptor());
+            fos.write(byteArray);
+            fos.close();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear();
+                values.put(MediaStore.Images.Media.IS_PENDING,0);
+                contentResolver.update(item, values, null, null);
+            }
+            Toast.makeText(this,"갤러리에 파일을 저장하였습니다.",Toast.LENGTH_SHORT).show();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this,"File Err",Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this,"I/O Err",Toast.LENGTH_SHORT).show();
         }
     }
 }
