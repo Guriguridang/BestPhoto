@@ -1,5 +1,10 @@
 package com.example.myapplication1;
 
+import static org.opencv.imgproc.Imgproc.COLOR_RGBA2RGB;
+import static org.opencv.imgproc.Imgproc.resize;
+import static org.opencv.photo.Photo.NORMAL_CLONE;
+import static org.opencv.photo.Photo.seamlessClone;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -29,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import org.opencv.android.Utils;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
@@ -50,6 +56,14 @@ public class gifViewer extends AppCompatActivity {
 
     private Uri tmpUri;
 
+    CascadeClassifier faceCascade;
+
+    MatOfRect targetfaces;
+
+    Mat targetImg;
+
+    Integer numOfFace=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +74,36 @@ public class gifViewer extends AppCompatActivity {
 
         Intent intent= getIntent();
         String action=intent.getAction();
+
+
+        // opencv setting
+        try {
+            System.loadLibrary("opencv_java4");
+            //haarcascade_frontalface_default 불러오기 - 얼굴객체 인식을 위한 머신러닝 데이터셋이다.
+            Context context = getApplicationContext();
+            InputStream is3 = context.getAssets().open("haarcascade_frontalface_default.xml");
+
+            // InputStream을 앱의 캐시디렉토리의 temporary file로 복사
+            File cascadeDir = context.getDir("cascade", Context.MODE_PRIVATE);
+            File cascadeFile = new File(cascadeDir, "haarcascade_frontalface_default.xml");
+            FileOutputStream os = new FileOutputStream(cascadeFile);
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = is3.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+
+            os.close();
+            // /data/user/0/com.example.myapplication1/app_cascade/haarcascade_frontalface_default.xml
+            // temporary file path를 이용해서 CascadeClassifier 생성
+            faceCascade = new CascadeClassifier(cascadeFile.getAbsolutePath());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
 
         if ("com.example.ACTION_TYPE_1".equals(action)) {
             // 촬영
@@ -93,11 +137,11 @@ public class gifViewer extends AppCompatActivity {
                 tmpUri = imageUri;
 
 
-                // 이미지 리사이징
+                // 이미지 리사이징. 비율은 자동조절됨
 //                int targetWidth = 310;
 //                int targetHeight = 100;
-                int targetWidth = 510;
-                int targetHeight = 200;
+                int targetWidth = 700;
+                int targetHeight = 400;
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
                 options.inJustDecodeBounds = true;
@@ -125,10 +169,7 @@ public class gifViewer extends AppCompatActivity {
 
                 //recognizeFace(image);
                 image.setId(j);
-                j++;
-                if (j==10) {
-                    break;
-                }
+
 
                 // n번 째 이미지 추출 이벤트
                 image.setOnClickListener(new View.OnClickListener() {
@@ -137,6 +178,192 @@ public class gifViewer extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), "이미지를 선택했습니다.", Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
+                // 얼굴 인식
+                // 갤러리에서 불러온 이미지를 얼굴객체를 인식하기 위해 Mat 형식으로 변환
+                Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
+                Mat originalMatImg = new Mat();
+                Utils.bitmapToMat(bitmap, originalMatImg);
+
+                // 이미지를 분석하기 위해 흑백이미지로 변환
+                Mat gray = new Mat();
+                Imgproc.cvtColor(originalMatImg, gray, Imgproc.COLOR_RGBA2GRAY);
+
+                MatOfRect faces;
+                faces = new MatOfRect();
+
+
+
+
+                // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
+                faceCascade.detectMultiScale(gray, faces, 1.11, 5);
+
+
+                // 첫번째 프레임은 디폴트이미지이기 때문에 전역으로 백업
+//                if(j==0) {
+//                    targetfaces = faces;
+//                    targetImg = originalMatImg.clone(); // clone 해야되나?
+//                    numOfFace = faces.toArray().length;
+//                }
+
+                // 얼굴 가장 많이 인식된 이미지가 디폴트가 되도록 수정
+                if(faces.toArray().length > numOfFace) {
+                    targetfaces = faces;
+                    targetImg = originalMatImg.clone(); // clone 해야되나?
+                    numOfFace = faces.toArray().length;
+                }
+
+
+                // 네모 안칠할 백업 이미지
+                Mat backupMat = originalMatImg.clone();
+
+                // 인식된 얼굴에 사각형으로 표시
+                for (Rect rect : faces.toArray()) {
+                    Imgproc.rectangle(backupMat, rect.tl(), rect.br(), new Scalar(255, 255, 255), 8);
+                }
+
+
+
+                // imageView2에 결과를 보여주기 위한 처리
+                Bitmap resultBitmapImg = Bitmap.createBitmap(gray.cols(), gray.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(backupMat, resultBitmapImg);
+                image.setImageBitmap(resultBitmapImg);
+
+
+                // 터치이벤트
+                image.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        int action = event.getAction();
+                        float curX = event.getX();  //터치한 곳의 X좌표
+                        float curY = event.getY();  // Y좌표
+
+                        // 이거 위에서 설정 되어야하는데 일로 오면 0으로 적용되는 문제
+                        //numOfFace = 1;
+
+                        if(action == event.ACTION_UP) { // 누르고 땠을 때만
+                            //현재 이미지뷰의 인식된 얼굴이 터치되었을 경우 스왑함수 호출
+                            for(int i=0; i<numOfFace; i++) {
+                                Rect s = faces.toArray()[i];
+
+                                // 얼굴의 우측 아랫부분을 눌러야만 스왑함수가 실행되는 오류가 있다..!
+                                // 터치반응은 이미지의 좌우 약 100만큼 넘어가도 터치반응이 된다.
+                                // Rect 객체는 아무래도 이미지부터 시작하는듯?
+                                // y도 40정도 차이가 있는데, 단위의 차이인가..?
+                                System.out.println("터치좌표");
+                                System.out.println(curY);
+                                System.out.println(curX);
+                                System.out.println("얼굴좌표");
+                                //s.height가  328223 인 문제.
+                                System.out.println(s.y + "부터 " + (s.y + s.height));
+                                System.out.println(s.x + "부터 " + (s.x + s.width));
+
+                                if( (s.y <= curY) && (curY <= (s.y + s.height)) && (s.x <= curX) && (curX <= (s.x + s.width))) {
+
+                                    // 인덱싱작업: 디폴트이미지뷰의 얼굴중 누구의 얼굴인지 판별.
+                                    int sourceX = s.x;
+                                    int sourceY = s.y;
+                                    int subT = 10000;
+                                    int idx=0;
+
+                                    for (int j = 0; j < 1; j++) {
+                                        Rect targetTmp = targetfaces.toArray()[j]; // Get the target face rectangle
+                                        int targetX = targetTmp.x;
+                                        int targetY = targetTmp.y;
+                                        int sub = Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
+                                        if (sub < subT) {
+                                            subT = sub;
+                                            idx = j;
+                                        }
+                                    }
+
+                                    // 스왑 핵심함수 호출
+                                    // 여기서 idx는 디폴트이미지에서의 얼굴 인덱스이다.
+                                    // 이유: 얼굴인식이 되면 얼굴의 좌표순대로 저장되지 않고 지멋대로 저장되기 때문.
+                                    swapOne(originalMatImg, s, idx);
+                                }
+                            }
+                        }
+                        return true;
+                    }
+
+                    public void swapOne(Mat originalMatImg, Rect r, Integer i) {
+
+                        System.out.println("############시작");
+                        Rect sourceFaceRect = r;
+                        Rect targetFaceRect = targetfaces.toArray()[i];
+
+                        // 얼굴 크기 조정
+                        // Expand the detected region
+                        int xOffset = -30; // Adjust these values as needed to control the size
+                        int yOffset = -30;
+                        int widthOffset = 60;
+                        int heightOffset = 60;
+
+                        // Update the coordinates of the rectangle to make it larger
+                        sourceFaceRect.x += xOffset;
+                        sourceFaceRect.y += yOffset;
+                        sourceFaceRect.width += widthOffset;
+                        sourceFaceRect.height += heightOffset;
+
+                        // Ensure the region is within the image boundaries
+                        sourceFaceRect.x = Math.max(sourceFaceRect.x, 0);
+                        sourceFaceRect.y = Math.max(sourceFaceRect.y, 0);
+
+                        //원래
+                        // sourceFaceRect.width = Math.min(sourceFaceRect.width, sourceImg.cols() - sourceFaceRect.x);
+                        sourceFaceRect.width = Math.min(sourceFaceRect.width, originalMatImg.cols() - sourceFaceRect.x);
+                        sourceFaceRect.height = Math.min(sourceFaceRect.height, originalMatImg.rows() - sourceFaceRect.y);
+
+                        // Update the coordinates of the rectangle to make it larger
+                        targetFaceRect.x += xOffset;
+                        targetFaceRect.y += yOffset;
+                        targetFaceRect.width += widthOffset;
+                        targetFaceRect.height += heightOffset;
+
+                        // Ensure the region is within the image boundaries
+                        targetFaceRect.x = Math.max(targetFaceRect.x, 0);
+                        targetFaceRect.y = Math.max(targetFaceRect.y, 0);
+                        targetFaceRect.width = Math.min(targetFaceRect.width, targetImg.cols() - targetFaceRect.x);
+                        targetFaceRect.height = Math.min(targetFaceRect.height, targetImg.rows() - targetFaceRect.y);
+
+
+                        Mat sourceRoi = new Mat(originalMatImg, sourceFaceRect);
+
+                        Size targetSize = new Size(targetFaceRect.width, targetFaceRect.height);
+                        Mat sourceRoiResized = new Mat();
+                        resize(sourceRoi, sourceRoiResized, targetSize);
+
+                        Mat mask = Mat.ones(sourceRoiResized.size(), CvType.CV_8U);
+                        mask.setTo(new Scalar(256,256,256));
+
+                        Point center = new Point(targetFaceRect.x + targetFaceRect.width / 2, targetFaceRect.y + targetFaceRect.height / 2);
+                        Mat cloned = new Mat();
+
+                        // Skipped 46 frames!  The application may be doing too much work on its main thread.
+                        // 이라는 경고가 뜬다.
+
+                        // 파이썬에서는 되지만 안드에서는 안되던 문제 해결의 핵심 코드.
+                        Imgproc.cvtColor(sourceRoiResized, sourceRoiResized, COLOR_RGBA2RGB, 3);
+
+                        seamlessClone(sourceRoiResized, targetImg, mask, center, cloned, NORMAL_CLONE);
+                        targetImg = cloned;
+
+
+                        Bitmap bitmap4 = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
+                        Utils.matToBitmap(targetImg, bitmap4);
+                        imageView.setImageBitmap(bitmap4);
+                        System.out.println("############끝");
+                    }
+
+
+                });
+
+                j++;
+                if (j==10) {
+                    break;
+                }
             }
         } else if ("com.example.ACTION_TYPE_2".equals(action)) {
             // 갤러리
@@ -149,7 +376,9 @@ public class gifViewer extends AppCompatActivity {
             }
         }
 
-        imageView.setImageURI(tmpUri);
+        Bitmap bitmap4 = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(targetImg, bitmap4);
+        imageView.setImageBitmap(bitmap4);
 
         // 이미지 보정
         /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
@@ -190,9 +419,9 @@ public class gifViewer extends AppCompatActivity {
         btn_face.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(gifViewer.this, "얼굴 인식 시작", Toast.LENGTH_SHORT).show();
                 for(int i=0; i<9; i++) {
-                    System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
+                    //System.out.println("id ====" +llImagesContainer.findViewById(i).getId() );
                     ImageView view = llImagesContainer.findViewById(i);
                     recognizeFace(view);
                 }
@@ -262,9 +491,7 @@ public class gifViewer extends AppCompatActivity {
 
     private void recognizeFace(ImageView imageView) {
         try {
-            System.out.println("before");
             System.loadLibrary("opencv_java4");
-            System.out.println("hi");
             //haarcascade_frontalface_default 불러오기 - 얼굴객체 인식을 위한 머신러닝 데이터셋이다.
             Context context = getApplicationContext();
             InputStream is3 = context.getAssets().open("haarcascade_frontalface_default.xml");
@@ -323,4 +550,5 @@ public class gifViewer extends AppCompatActivity {
     public void onGalleryButtonClicked(View view) {
 
     }
+
 }
