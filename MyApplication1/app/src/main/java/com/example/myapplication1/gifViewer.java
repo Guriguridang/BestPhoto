@@ -50,6 +50,8 @@ public class gifViewer extends AppCompatActivity {
     private ImageView imageView;
     private LinearLayout llImagesContainer;
 
+    private static final int PICK_IMAGE_REQUEST = 1;
+
     private boolean isOpenCvLoaded = false;
 
     private float dX, dY;
@@ -376,19 +378,18 @@ public class gifViewer extends AppCompatActivity {
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), photo.class);
                 try {
-                    Drawable imageDrawable = imageView.getDrawable();
-                    if (imageDrawable instanceof BitmapDrawable) {
-                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
-                        // Bitmap을 인텐트에 추가
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                        byte[] byteArray = stream.toByteArray();
-                        intent.putExtra("image", byteArray);
-                        startActivity(intent);
-                    }
+                    Bitmap bitmap = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
+
+                    Utils.matToBitmap(targetImg, bitmap);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    intent.putExtra("img", byteArray);
+                    startActivity(intent);
+
                 }
                 catch (Exception E)
                 {
@@ -528,9 +529,23 @@ public class gifViewer extends AppCompatActivity {
         }
     }
 
-    // btn_gallery : 프레임 추출할 gif 재선택
-    public void onGalleryButtonClicked(View view) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri selectedImageUri = data.getData();
 
+            Intent intent = new Intent(this, gifViewer.class);
+            intent.putExtra("imageuri", selectedImageUri.toString());
+            intent.setAction("com.example.ACTION_TYPE_2");
+            startActivity(intent);
+        }
+    }
+    public void onGalleryButtonClicked(View view)
+    {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
 }
