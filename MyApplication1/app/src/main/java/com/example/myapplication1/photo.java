@@ -93,6 +93,10 @@ public class photo extends AppCompatActivity {
             // imageview 터치 이벤트(최종 보정 기능)
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                ImageView imageView = findViewById(R.id.image);
+                int imageViewWidth = imageView.getWidth();
+                int imageViewHeight = imageView.getHeight();
+
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         // Get the current bitmap from the ImageView
@@ -103,48 +107,59 @@ public class photo extends AppCompatActivity {
                             originalBitmap.getPixels(pixels, 0, originalBitmap.getWidth(), 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
 
                             // Capture the pixel color of the initial touch position
-                            int startX = (int) event.getX();
-                            int startY = (int) event.getY();
+                            int startX = (int) (event.getX() * originalBitmap.getWidth() / imageViewWidth);
+                            int startY = (int) (event.getY() * originalBitmap.getHeight() / imageViewHeight);
+
+                            // Check if the touch coordinates are within the Bitmap bounds
+                            if (startX < 0 || startX >= originalBitmap.getWidth() || startY < 0 || startY >= originalBitmap.getHeight()) {
+                                originalBitmap = null;
+                                pixels = null;
+                                return false; // Ignore touch event if outside Bitmap bounds
+                            }
                             startPixel = pixels[startY * originalBitmap.getWidth() + startX];
+
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (originalBitmap != null) {
                             // 터치 시작점의 좌표
-                            int startX = (int) event.getX(0);
-                            int startY = (int) event.getY(0);
+                            int startX = (int) (event.getX() * originalBitmap.getWidth() / imageViewWidth);
+                            int startY = (int) (event.getY() * originalBitmap.getHeight() / imageViewHeight);
 
-                            // 터치된 영역의 색상
-                            int touchColor = originalBitmap.getPixel(startX, startY);
+                            // Check if the touch coordinates are within the Bitmap bounds
+                            if (startX >= 0 && startX < originalBitmap.getWidth() && startY >= 0 && startY < originalBitmap.getHeight()) {
+                                // 터치된 영역의 색상
+                                int touchColor = originalBitmap.getPixel(startX, startY);
 
-                            // Apply the touchColor to all touched pixels in the specified radius
-                            int radius = 3; // 원하는 반경 설정
-                            for (int dx = -radius; dx <= radius; dx++) {
-                                for (int dy = -radius; dy <= radius; dy++) {
-                                    int x = startX + dx;
-                                    int y = startY + dy;
+                                // Apply the touchColor to all touched pixels in the specified radius
+                                int radius = 3; // 원하는 반경 설정
+                                for (int dx = -radius; dx <= radius; dx++) {
+                                    for (int dy = -radius; dy <= radius; dy++) {
+                                        int x = startX + dx;
+                                        int y = startY + dy;
 
-                                    // 픽셀이 이미지 내부에 있는지 확인
-                                    if (x >= 0 && x < originalBitmap.getWidth() && y >= 0 && y < originalBitmap.getHeight()) {
-                                        pixels[y * originalBitmap.getWidth() + x] = touchColor;
+                                        // 픽셀이 이미지 내부에 있는지 확인
+                                        if (x >= 0 && x < originalBitmap.getWidth() && y >= 0 && y < originalBitmap.getHeight()) {
+                                            pixels[y * originalBitmap.getWidth() + x] = touchColor;
+                                        }
                                     }
                                 }
+
+                                // Create a new Bitmap and set the modified pixels
+                                Bitmap newBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                                newBitmap.setPixels(pixels, 0, originalBitmap.getWidth(), 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
+
+                                // Update the UI on the main thread
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (newBitmap != null && !newBitmap.sameAs(originalBitmap)) {
+                                            imageView.setImageBitmap(newBitmap);
+                                            imageView.invalidate();
+                                        }
+                                    }
+                                });
                             }
-
-                            // Create a new Bitmap and set the modified pixels
-                            Bitmap newBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                            newBitmap.setPixels(pixels, 0, originalBitmap.getWidth(), 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
-
-                            // Update the UI on the main thread
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (newBitmap != null && !newBitmap.sameAs(originalBitmap)) {
-                                        imageView.setImageBitmap(newBitmap);
-                                        imageView.invalidate();
-                                    }
-                                }
-                            });
                         }
                         break;
 
@@ -156,6 +171,7 @@ public class photo extends AppCompatActivity {
                 return true;
             }
         });
+
 
     }
 
