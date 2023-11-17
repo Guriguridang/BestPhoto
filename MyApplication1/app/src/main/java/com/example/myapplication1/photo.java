@@ -1,6 +1,8 @@
 package com.example.myapplication1;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,7 +10,11 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
@@ -28,6 +34,7 @@ import org.opencv.objdetect.CascadeClassifier;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,11 +42,9 @@ import java.util.Arrays;
 
 public class photo extends AppCompatActivity {
     private ImageView imageView;
+    public byte[] byteArray;
     private float prevX = -1;
     private float prevY = -1;
-    private boolean isDragging = false;
-
-    private Matrix imageMatrix = new Matrix();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +54,7 @@ public class photo extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            byte[] byteArray = intent.getByteArrayExtra("img");
+            byteArray = intent.getByteArrayExtra("img");
 
             if (byteArray != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
@@ -57,11 +62,27 @@ public class photo extends AppCompatActivity {
                 imageView.setImageBitmap(bitmap);
             }
         }
-        Button btn_edit = findViewById(R.id.btn_editphoto);
+        // 보정하기
+        Button btn_edit = findViewById(R.id.btn_reload);
         btn_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recognizeFace(imageView);
+//                recognizeFace(imageView);
+                // imageview에 다시 원본 로드
+                if (byteArray != null) {
+                    Toast.makeText(getApplicationContext(), "되돌리기", Toast.LENGTH_SHORT).show();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                    ImageView imageView = findViewById(R.id.image);
+                    imageView.setImageBitmap(bitmap);
+                }   
+            }
+        });
+        // 저장하기
+        Button btn_save = findViewById(R.id.btn_savegallery);
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveFile("photo.jpg");
             }
         });
         imageView.setOnTouchListener(new View.OnTouchListener() {
@@ -69,6 +90,7 @@ public class photo extends AppCompatActivity {
             private int[] pixels;
             private int startPixel; // To store the pixel value of the initial touch position
 
+            // imageview 터치 이벤트(최종 보정 기능)
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -88,15 +110,45 @@ public class photo extends AppCompatActivity {
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (originalBitmap != null) {
-                            // Apply the startPixel color to all touched pixels
-                            int x = (int) event.getX();
-                            int y = (int) event.getY();
-                            pixels[y * originalBitmap.getWidth() + x] = startPixel;
-                            Bitmap newBitmap = Bitmap.createBitmap(pixels, originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                            imageView.setImageBitmap(newBitmap);
-                            Toast.makeText(photo.this, "d", Toast.LENGTH_SHORT).show();
+
+                            // 터치 시작점의 좌표
+                            int startX = (int) event.getX(0);
+                            int startY = (int) event.getY(0);
+
+                            // 터치된 영역의 색상
+                            int touchColor = originalBitmap.getPixel(startX, startY);
+
+                            // Apply the touchColor to all touched pixels in the specified radius
+                            int radius = 3; // 원하는 반경 설정
+                            for (int dx = -radius; dx <= radius; dx++) {
+                                for (int dy = -radius; dy <= radius; dy++) {
+                                    int x = startX + dx;
+                                    int y = startY + dy;
+
+                                    // 픽셀이 이미지 내부에 있는지 확인
+                                    if (x >= 0 && x < originalBitmap.getWidth() && y >= 0 && y < originalBitmap.getHeight()) {
+                                        pixels[y * originalBitmap.getWidth() + x] = touchColor;
+                                    }
+                                }
+                            }
+
+                            // Create a new Bitmap and set the modified pixels
+                            Bitmap newBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                            newBitmap.setPixels(pixels, 0, originalBitmap.getWidth(), 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
+
+                            // Update the UI on the main thread
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (newBitmap != null && !newBitmap.sameAs(originalBitmap)) {
+                                        imageView.setImageBitmap(newBitmap);
+                                        imageView.invalidate();
+                                    }
+                                }
+                            });
                         }
                         break;
+
                     case MotionEvent.ACTION_UP:
                         originalBitmap = null;
                         pixels = null;
@@ -124,7 +176,38 @@ public class photo extends AppCompatActivity {
         return bitmap;
     }
 
+    private void saveFile(String filename) {
+        ContentValues values = new ContentValues();
+        values.put(MediaStore.Images.Media.DISPLAY_NAME, filename);
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/*");
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            values.put( MediaStore.Images.Media.IS_PENDING, 1); }
+
+        ContentResolver contentResolver = getContentResolver();
+        Uri item = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+        try {
+            ParcelFileDescriptor pdf = contentResolver.openFileDescriptor(item, "w", null);
+            FileOutputStream fos = new FileOutputStream(pdf.getFileDescriptor());
+            fos.write(byteArray);
+            fos.close();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                values.clear();
+                values.put(MediaStore.Images.Media.IS_PENDING,0);
+                contentResolver.update(item, values, null, null);
+            }
+            Toast.makeText(this,"갤러리에 파일을 저장하였습니다.",Toast.LENGTH_SHORT).show();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this,"File Err",Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this,"I/O Err",Toast.LENGTH_SHORT).show();
+        }
+    }
     private void recognizeFace(ImageView imageView) {
         try {
             System.loadLibrary("opencv_java4");

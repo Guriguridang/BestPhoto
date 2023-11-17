@@ -48,6 +48,9 @@ import org.opencv.objdetect.Objdetect;
 
 public class gifViewer extends AppCompatActivity {
     private ImageView imageView;
+
+    private static final int PICK_IMAGE_REQUEST = 1;
+
     private LinearLayout llImagesContainer;
 
     private boolean isOpenCvLoaded = false;
@@ -283,6 +286,7 @@ public class gifViewer extends AppCompatActivity {
 
                                 if( (s.y <= nowCurY) && (nowCurY <= (s.y + s.height)) && (s.x <= nowCurX) && (nowCurX <= (s.x + s.width))) {
 
+
                                     // 인덱싱작업: 디폴트이미지뷰의 얼굴중 누구의 얼굴인지 판별.
                                     int sourceX = s.x;
                                     int sourceY = s.y;
@@ -408,16 +412,6 @@ public class gifViewer extends AppCompatActivity {
         Utils.matToBitmap(targetImg, bitmap4);
         imageView.setImageBitmap(bitmap4);
 
-        // 이미지 보정
-        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
-        extractFramesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
-                extractEyes(imageView);
-            }
-        });
-        */
         Button btn_next = findViewById(R.id.btnNext);
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -436,7 +430,6 @@ public class gifViewer extends AppCompatActivity {
 //                        startActivity(intent);
 //                    }
 
-
                     Bitmap bitmap = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
 
                     Utils.matToBitmap(targetImg, bitmap);
@@ -446,7 +439,6 @@ public class gifViewer extends AppCompatActivity {
 
                     intent.putExtra("img", byteArray);
                     startActivity(intent);
-
 
                 }
                 catch (Exception e){
@@ -521,11 +513,24 @@ public class gifViewer extends AppCompatActivity {
     }
 
 
-    // btn_gallery : 프레임 추출할 gif 재선택
-    public void onGalleryButtonClicked(View view) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri selectedImageUri = data.getData();
 
+            Intent intent = new Intent(this, gifViewer.class);
+            intent.putExtra("imageuri", selectedImageUri.toString());
+            intent.setAction("com.example.ACTION_TYPE_2");
+            startActivity(intent);
+        }
     }
-
 }
 
-
+//    public void onGalleryButtonClicked(View view)
+//    {
+//        Intent intent = new Intent();
+//        intent.setType("image/*");
+//        intent.setAction(Intent.ACTION_GET_CONTENT);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+//    }
+//}
