@@ -48,6 +48,9 @@ import org.opencv.objdetect.Objdetect;
 
 public class gifViewer extends AppCompatActivity {
     private ImageView imageView;
+
+    private static final int PICK_IMAGE_REQUEST = 1;
+
     private LinearLayout llImagesContainer;
 
     private boolean isOpenCvLoaded = false;
@@ -535,9 +538,23 @@ public class gifViewer extends AppCompatActivity {
         }
     }
 
-    // btn_gallery : 프레임 추출할 gif 재선택
-    public void onGalleryButtonClicked(View view) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri selectedImageUri = data.getData();
 
+            Intent intent = new Intent(this, gifViewer.class);
+            intent.putExtra("imageuri", selectedImageUri.toString());
+            intent.setAction("com.example.ACTION_TYPE_2");
+            startActivity(intent);
+        }
+    }
+    public void onGalleryButtonClicked(View view)
+    {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
 }
