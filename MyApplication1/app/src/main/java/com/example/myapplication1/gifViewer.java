@@ -268,18 +268,20 @@ public class gifViewer extends AppCompatActivity {
                                 System.out.println("수정후 터치좌표");
 
 
-                                curY = (curY*scaleFactor2);
-                                curX = ((curX-100)*scaleFactor2);
+                                //curY = (curY*scaleFactor2);
+                                //curX = ((curX-100)*scaleFactor2);
+                                double nowCurY = (curY*scaleFactor2);
+                                double nowCurX = ((curX-100)*scaleFactor2);
 
                                 System.out.println("수정후 터치좌표");
-                                System.out.println(curY);
-                                System.out.println(curX);
+                                System.out.println(nowCurY);
+                                System.out.println(nowCurX);
 
                                 System.out.println("얼굴좌표");
                                 System.out.println(s.y + "부터 " + (s.y + s.height));
                                 System.out.println(s.x + "부터 " + (s.x + s.width));
 
-                                if( (s.y <= curY) && (curY <= (s.y + s.height)) && (s.x <= curX) && (curX <= (s.x + s.width))) {
+                                if( (s.y <= nowCurY) && (nowCurY <= (s.y + s.height)) && (s.x <= nowCurX) && (nowCurX <= (s.x + s.width))) {
 
                                     // 인덱싱작업: 디폴트이미지뷰의 얼굴중 누구의 얼굴인지 판별.
                                     int sourceX = s.x;
@@ -318,10 +320,14 @@ public class gifViewer extends AppCompatActivity {
 
                         // 얼굴 크기 조정
                         // Expand the detected region
-                        int xOffset = -30; // Adjust these values as needed to control the size
-                        int yOffset = -30;
-                        int widthOffset = 60;
-                        int heightOffset = 60;
+//                        int xOffset = -30; // Adjust these values as needed to control the size
+//                        int yOffset = -30;
+//                        int widthOffset = 60;
+//                        int heightOffset = 60;
+                        int xOffset = -80; // Adjust these values as needed to control the size
+                        int yOffset = -80;
+                        int widthOffset = 160;
+                        int heightOffset = 160;
 
                         // Update the coordinates of the rectangle to make it larger
                         sourceFaceRect.x += xOffset;
