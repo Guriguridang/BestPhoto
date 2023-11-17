@@ -42,8 +42,6 @@ import java.util.Arrays;
 
 public class photo extends AppCompatActivity {
     private ImageView imageView;
-
-    private ImageView imageView2;
     public byte[] byteArray;
     private float prevX = -1;
     private float prevY = -1;
@@ -53,11 +51,10 @@ public class photo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
         imageView = findViewById(R.id.image);
-        imageView2= findViewById(R.id.image2);
 
         Intent intent = getIntent();
         if (intent != null) {
-            byte[] byteArray = intent.getByteArrayExtra("image");
+            byteArray = intent.getByteArrayExtra("img");
 
             if (byteArray != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
@@ -66,11 +63,18 @@ public class photo extends AppCompatActivity {
             }
         }
         // 보정하기
-        Button btn_edit = findViewById(R.id.btn_editphoto);
+        Button btn_edit = findViewById(R.id.btn_reload);
         btn_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recognizeFace(imageView);
+//                recognizeFace(imageView);
+                // imageview에 다시 원본 로드
+                if (byteArray != null) {
+                    Toast.makeText(getApplicationContext(), "되돌리기", Toast.LENGTH_SHORT).show();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                    ImageView imageView = findViewById(R.id.image);
+                    imageView.setImageBitmap(bitmap);
+                }   
             }
         });
         // 저장하기
@@ -86,6 +90,7 @@ public class photo extends AppCompatActivity {
             private int[] pixels;
             private int startPixel; // To store the pixel value of the initial touch position
 
+            // imageview 터치 이벤트(최종 보정 기능)
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getAction()) {
@@ -113,7 +118,7 @@ public class photo extends AppCompatActivity {
                             int touchColor = originalBitmap.getPixel(startX, startY);
 
                             // Apply the touchColor to all touched pixels in the specified radius
-                            int radius = 5; // 원하는 반경 설정
+                            int radius = 3; // 원하는 반경 설정
                             for (int dx = -radius; dx <= radius; dx++) {
                                 for (int dy = -radius; dy <= radius; dy++) {
                                     int x = startX + dx;

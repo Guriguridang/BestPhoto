@@ -380,33 +380,22 @@ public class gifViewer extends AppCompatActivity {
         Utils.matToBitmap(targetImg, bitmap4);
         imageView.setImageBitmap(bitmap4);
 
-        // 이미지 보정
-        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
-        extractFramesButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
-                extractEyes(imageView);
-            }
-        });
-        */
         Button btn_next = findViewById(R.id.btnNext);
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), photo.class);
                 try {
-                    Drawable imageDrawable = imageView.getDrawable();
-                    if (imageDrawable instanceof BitmapDrawable) {
-                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
-                        // Bitmap을 인텐트에 추가
-                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-                        byte[] byteArray = stream.toByteArray();
-                        intent.putExtra("image", byteArray);
-                        startActivity(intent);
-                    }
+                    Bitmap bitmap = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
+
+                    Utils.matToBitmap(targetImg, bitmap);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    intent.putExtra("img", byteArray);
+                    startActivity(intent);
+
                 }
                 catch (Exception E)
                 {

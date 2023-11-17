@@ -8,23 +8,11 @@
 
     <ImageView
         android:id="@+id/image"
-        android:layout_width="290dp"
-        android:layout_height="240dp"
+        android:layout_width="370dp"
+        android:layout_height="500dp"
         android:layout_marginTop="32dp"
         android:scaleType="fitCenter"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.404"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/image2"
-        android:layout_width="290dp"
-        android:layout_height="240dp"
-        android:layout_marginTop="320dp"
-        android:scaleType="fitCenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.404"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,11 +27,11 @@
         android:layout_margin="16dp">
 
         <Button
-            android:id="@+id/btn_editphoto"
+            android:id="@+id/btn_reload"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="보정하기" />
+            android:text="되돌리기" />
 
         <Button
             android:id="@+id/btn_savegallery"
