@@ -380,6 +380,7 @@ public class CameraActivity extends AppCompatActivity {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+                    soundPool.play(soundId1,4.0f,4.0f,1,0,1.0f);
 
                     File ff = new File(cacheDir, "image_" + (i + 1) + ".jpg");
                     File flippedFile = new File(cacheDir, "flipped_image_" + (i + 1) + ".jpg");

@@ -38,6 +38,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -68,13 +69,16 @@ public class photo extends AppCompatActivity {
                 ImageView imageView = findViewById(R.id.image);
                 imageView.setImageBitmap(bitmap);
 
-                btn_save.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        saveFile();
-                    }
-                });
+
             }
+            btn_save.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    saveBitmapToFile(getBitmapFromImageView(imageView));
+
+                }
+            });
         }
         Button btn_edit = findViewById(R.id.btn_editphoto);
         btn_edit.setOnClickListener(new View.OnClickListener() {
@@ -190,42 +194,60 @@ public class photo extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    
+    private void saveBitmapToFile(Bitmap bitmap) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
+        String timestamp = sdf.format(new Date());
 
-    private void saveFile() {
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMdd_HHmmss",Locale.KOREA);
-        String timestamp=sdf.format(new Date());
-
-        String filename="image"+timestamp+".jpg";
+        String filename = "image_" + timestamp + ".jpg";
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.DISPLAY_NAME, filename);
-        values.put(MediaStore.Images.Media.MIME_TYPE, "image/*");
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg"); // 이미지 형식 지정
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            values.put( MediaStore.Images.Media.IS_PENDING, 1);
+            values.put(MediaStore.Images.Media.IS_PENDING, 1);
         }
 
         ContentResolver contentResolver = getContentResolver();
         Uri item = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
         try {
-            ParcelFileDescriptor pdf = contentResolver.openFileDescriptor(item, "w", null);
-            FileOutputStream fos = new FileOutputStream(pdf.getFileDescriptor());
-            fos.write(byteArray);
-            fos.close();
+            // 비트맵을 JPEG 파일로 압축하여 저장
+            OutputStream outputStream = contentResolver.openOutputStream(item);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 values.clear();
-                values.put(MediaStore.Images.Media.IS_PENDING,0);
+                values.put(MediaStore.Images.Media.IS_PENDING, 0);
                 contentResolver.update(item, values, null, null);
             }
-            Toast.makeText(this,"갤러리에 파일을 저장하였습니다.",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "갤러리에 파일을 저장하였습니다.", Toast.LENGTH_SHORT).show();
 
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            Toast.makeText(this,"File Err",Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this,"I/O Err",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "파일 저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private Bitmap getBitmapFromImageView(ImageView imageView) {
+        // 이미지뷰에서 Drawable을 가져옵니다.
+        Drawable drawable = imageView.getDrawable();
+
+        // Drawable을 비트맵으로 변환합니다.
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            // Drawable이 비트맵이 아닌 경우, 새로운 비트맵을 생성하여 이미지뷰의 내용을 그려줍니다.
+            int width = drawable.getIntrinsicWidth();
+            int height = drawable.getIntrinsicHeight();
+
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+
+            return bitmap;
+        }
+    }
+
 }
