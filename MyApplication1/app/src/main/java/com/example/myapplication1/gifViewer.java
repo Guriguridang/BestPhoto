@@ -48,9 +48,6 @@ import org.opencv.objdetect.Objdetect;
 
 public class gifViewer extends AppCompatActivity {
     private ImageView imageView;
-
-    private static final int PICK_IMAGE_REQUEST = 1;
-
     private LinearLayout llImagesContainer;
 
     private boolean isOpenCvLoaded = false;
@@ -65,7 +62,7 @@ public class gifViewer extends AppCompatActivity {
 
     Mat targetImg;
 
-    Integer numOfFace=0;
+    Integer numOfFace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,27 +193,16 @@ public class gifViewer extends AppCompatActivity {
                 MatOfRect faces;
                 faces = new MatOfRect();
 
-
-
-
-                // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
-                faceCascade.detectMultiScale(gray, faces, 1.11, 5);
-
-
                 // 첫번째 프레임은 디폴트이미지이기 때문에 전역으로 백업
-//                if(j==0) {
-//                    targetfaces = faces;
-//                    targetImg = originalMatImg.clone(); // clone 해야되나?
-//                    numOfFace = faces.toArray().length;
-//                }
-
-                // 얼굴 가장 많이 인식된 이미지가 디폴트가 되도록 수정
-                if(faces.toArray().length > numOfFace) {
+                if(j==0) {
                     targetfaces = faces;
                     targetImg = originalMatImg.clone(); // clone 해야되나?
                     numOfFace = faces.toArray().length;
                 }
 
+
+                // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
+                faceCascade.detectMultiScale(gray, faces, 1.11, 5);
 
                 // 네모 안칠할 백업 이미지
                 Mat backupMat = originalMatImg.clone();
@@ -225,8 +211,6 @@ public class gifViewer extends AppCompatActivity {
                 for (Rect rect : faces.toArray()) {
                     Imgproc.rectangle(backupMat, rect.tl(), rect.br(), new Scalar(255, 255, 255), 8);
                 }
-
-
 
                 // imageView2에 결과를 보여주기 위한 처리
                 Bitmap resultBitmapImg = Bitmap.createBitmap(gray.cols(), gray.rows(), Bitmap.Config.ARGB_8888);
@@ -243,51 +227,46 @@ public class gifViewer extends AppCompatActivity {
                         float curY = event.getY();  // Y좌표
 
                         // 이거 위에서 설정 되어야하는데 일로 오면 0으로 적용되는 문제
-                        //numOfFace = 1;
+                        numOfFace = 1;
 
-                        if(action == event.ACTION_UP) { // 누르고 땠을 때만
-                            //현재 이미지뷰의 인식된 얼굴이 터치되었을 경우 스왑함수 호출
-                            for(int i=0; i<numOfFace; i++) {
-                                Rect s = faces.toArray()[i];
+                         //현재 이미지뷰의 인식된 얼굴이 터치되었을 경우 스왑함수 호출
+                        for(int i=0; i<numOfFace; i++) {
+                            Rect s = faces.toArray()[i];
 
-                                // 얼굴의 우측 아랫부분을 눌러야만 스왑함수가 실행되는 오류가 있다..!
-                                // 터치반응은 이미지의 좌우 약 100만큼 넘어가도 터치반응이 된다.
-                                // Rect 객체는 아무래도 이미지부터 시작하는듯?
-                                // y도 40정도 차이가 있는데, 단위의 차이인가..?
-                                System.out.println("터치좌표");
-                                System.out.println(curY);
-                                System.out.println(curX);
-                                System.out.println("얼굴좌표");
-                                //s.height가  328223 인 문제.
-                                System.out.println(s.y + "부터 " + (s.y + s.height));
-                                System.out.println(s.x + "부터 " + (s.x + s.width));
+                            // 얼굴의 우측 아랫부분을 눌러야만 스왑함수가 실행되는 오류가 있다..!
+                            System.out.println("터치좌표");
+                            System.out.println(curY);
+                            System.out.println(curX);
+                            System.out.println("얼굴좌표");
+                            System.out.println(s.y);
+                            System.out.println(s.x);
 
-                                if( (s.y <= curY) && (curY <= (s.y + s.height)) && (s.x <= curX) && (curX <= (s.x + s.width))) {
+                            if( (s.y <= curY) && (curY <= (s.y + s.height)) && (s.x <= curX) && (curX <= (s.x + s.width))) {
 
-                                    // 인덱싱작업: 디폴트이미지뷰의 얼굴중 누구의 얼굴인지 판별.
-                                    int sourceX = s.x;
-                                    int sourceY = s.y;
-                                    int subT = 10000;
-                                    int idx=0;
+                                // 인덱싱작업: 디폴트이미지뷰의 얼굴중 누구의 얼굴인지 판별.
+                                int sourceX = s.x;
+                                int sourceY = s.y;
+                                int subT = 10000;
+                                int idx=0;
 
-                                    for (int j = 0; j < 1; j++) {
-                                        Rect targetTmp = targetfaces.toArray()[j]; // Get the target face rectangle
-                                        int targetX = targetTmp.x;
-                                        int targetY = targetTmp.y;
-                                        int sub = Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
-                                        if (sub < subT) {
-                                            subT = sub;
-                                            idx = j;
-                                        }
+                                for (int j = 0; j < 1; j++) {
+                                    Rect targetTmp = targetfaces.toArray()[j]; // Get the target face rectangle
+                                    int targetX = targetTmp.x;
+                                    int targetY = targetTmp.y;
+                                    int sub = Math.abs(sourceX - targetX) + Math.abs(sourceY - targetY);
+                                    if (sub < subT) {
+                                        subT = sub;
+                                        idx = j;
                                     }
-
-                                    // 스왑 핵심함수 호출
-                                    // 여기서 idx는 디폴트이미지에서의 얼굴 인덱스이다.
-                                    // 이유: 얼굴인식이 되면 얼굴의 좌표순대로 저장되지 않고 지멋대로 저장되기 때문.
-                                    swapOne(originalMatImg, s, idx);
                                 }
+
+                                // 스왑 핵심함수 호출
+                                // 여기서 idx는 디폴트이미지에서의 얼굴 인덱스이다.
+                                // 이유: 얼굴인식이 되면 얼굴의 좌표순대로 저장되지 않고 지멋대로 저장되기 때문.
+                                swapOne(originalMatImg, s, idx);
                             }
                         }
+
                         return true;
                     }
 
@@ -383,22 +362,33 @@ public class gifViewer extends AppCompatActivity {
         Utils.matToBitmap(targetImg, bitmap4);
         imageView.setImageBitmap(bitmap4);
 
+        // 이미지 보정
+        /*Button extractFramesButton = findViewById(R.id.btnExtractFrames);
+        extractFramesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "보정하기 선택", Toast.LENGTH_SHORT).show();
+                extractEyes(imageView);
+            }
+        });
+        */
         Button btn_next = findViewById(R.id.btnNext);
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Toast.makeText(gifViewer.this, "debug", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), photo.class);
                 try {
-                    Bitmap bitmap = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
-
-                    Utils.matToBitmap(targetImg, bitmap);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
-                    byte[] byteArray = stream.toByteArray();
-
-                    intent.putExtra("img", byteArray);
-                    startActivity(intent);
-
+                    Drawable imageDrawable = imageView.getDrawable();
+                    if (imageDrawable instanceof BitmapDrawable) {
+                        Bitmap bitmap = ((BitmapDrawable) imageDrawable).getBitmap();
+                        // Bitmap을 인텐트에 추가
+                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                        byte[] byteArray = stream.toByteArray();
+                        intent.putExtra("image", byteArray);
+                        startActivity(intent);
+                    }
                 }
                 catch (Exception E)
                 {
@@ -538,23 +528,9 @@ public class gifViewer extends AppCompatActivity {
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            Uri selectedImageUri = data.getData();
+    // btn_gallery : 프레임 추출할 gif 재선택
+    public void onGalleryButtonClicked(View view) {
 
-            Intent intent = new Intent(this, gifViewer.class);
-            intent.putExtra("imageuri", selectedImageUri.toString());
-            intent.setAction("com.example.ACTION_TYPE_2");
-            startActivity(intent);
-        }
-    }
-    public void onGalleryButtonClicked(View view)
-    {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
     }
 
 }
