@@ -211,7 +211,7 @@ public class gifViewer extends AppCompatActivity {
 
                 // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
                 //faceCascade.detectMultiScale(gray, faces, 1.11, 5);
-                faceCascade.detectMultiScale(gray, faces, 1.11, 9);
+                faceCascade.detectMultiScale(gray, faces, 1.11, 16);
 
 
                 // 첫번째 프레임은 디폴트이미지이기 때문에 전역으로 백업
@@ -434,7 +434,7 @@ public class gifViewer extends AppCompatActivity {
 
                     Utils.matToBitmap(targetImg, bitmap);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG,100,stream);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG,90,stream);
                     byte[] byteArray = stream.toByteArray();
 
                     intent.putExtra("img", byteArray);
