@@ -13,6 +13,8 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -20,6 +22,7 @@ import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 import android.content.Intent;
 import android.widget.ImageView;
@@ -46,45 +49,80 @@ import java.util.Locale;
 
 public class photo extends AppCompatActivity {
     private ImageView imageView;
+    public byte[] byteArray;
     private float prevX = -1;
     private float prevY = -1;
-    private boolean isDragging = false;
 
-    private Matrix imageMatrix = new Matrix();
-    private byte[] byteArray;
+    double scaleFactor = 1.66;
+
+    int touchColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
         imageView = findViewById(R.id.image);
-        Button btn_save=findViewById(R.id.btn_savegallery);
 
         Intent intent = getIntent();
         if (intent != null) {
-            byteArray = intent.getByteArrayExtra("image");
+            byteArray = intent.getByteArrayExtra("img");
 
             if (byteArray != null) {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
                 ImageView imageView = findViewById(R.id.image);
                 imageView.setImageBitmap(bitmap);
-
-
             }
-            btn_save.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    saveBitmapToFile(getBitmapFromImageView(imageView));
-
-                }
-            });
         }
-        Button btn_edit = findViewById(R.id.btn_editphoto);
+        // 보정하기
+        Button btn_edit = findViewById(R.id.btn_reload);
         btn_edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recognizeFace(imageView);
+//                recognizeFace(imageView);
+                // imageview에 다시 원본 로드
+                if (byteArray != null) {
+                    Toast.makeText(getApplicationContext(), "되돌리기", Toast.LENGTH_SHORT).show();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+                    ImageView imageView = findViewById(R.id.image);
+                    imageView.setImageBitmap(bitmap);
+                }
+            }
+        });
+
+
+
+        // 저장하기
+        Button btn_save = findViewById(R.id.btn_savegallery);
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveBitmapToFile(getBitmapFromImageView(imageView));
+            }
+        });
+        EditText emailText=findViewById(R.id.email);
+        Button btn_send=findViewById(R.id.send);
+        btn_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 백그라운드 스레드에서 작업 실행
+                        final Bitmap bitmap = getBitmapFromImageView(imageView);
+                        final String emailAddress = emailText.getText().toString();
+                        SendMail mail = new SendMail(bitmap);
+                        boolean isSuccess = mail.sendSecurityCode(getApplicationContext(), emailAddress);
+
+                        // Handler를 사용하여 UI 스레드로 결과 전달
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(isSuccess) Toast.makeText(getApplicationContext(),"메일 전송 성공", Toast.LENGTH_SHORT).show();
+                                else Toast.makeText(getApplicationContext(),"메일 전송 실패", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }).start();
             }
         });
         imageView.setOnTouchListener(new View.OnTouchListener() {
@@ -92,8 +130,13 @@ public class photo extends AppCompatActivity {
             private int[] pixels;
             private int startPixel; // To store the pixel value of the initial touch position
 
+            // imageview 터치 이벤트(최종 보정 기능)
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                ImageView imageView = findViewById(R.id.image);
+                int imageViewWidth = imageView.getWidth();
+                int imageViewHeight = imageView.getHeight();
+
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         // Get the current bitmap from the ImageView
@@ -104,22 +147,113 @@ public class photo extends AppCompatActivity {
                             originalBitmap.getPixels(pixels, 0, originalBitmap.getWidth(), 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
 
                             // Capture the pixel color of the initial touch position
+//                            int startX = (int) (event.getX() * originalBitmap.getWidth() / imageViewWidth);
+//                            int startY = (int) (event.getY() * originalBitmap.getHeight() / imageViewHeight);
                             int startX = (int) event.getX();
                             int startY = (int) event.getY();
+//                            System.out.println("터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
+
+                            scaleFactor = (double)imageView.getHeight() / (double)originalBitmap.getHeight();
+//                            System.out.println("scaleFactor#####");
+//                            System.out.println(scaleFactor);
+
+
+
+                            startX -= 410;
+                            startY /= scaleFactor;
+                            startX /= scaleFactor;
+
+//                            System.out.println("수정된 터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
+
+
+                            // Check if the touch coordinates are within the Bitmap bounds
+                            if (startX < 0 || startX >= originalBitmap.getWidth() || startY < 0 || startY >= originalBitmap.getHeight()) {
+                                originalBitmap = null;
+                                pixels = null;
+                                return false; // Ignore touch event if outside Bitmap bounds
+                            }
                             startPixel = pixels[startY * originalBitmap.getWidth() + startX];
+                            touchColor = originalBitmap.getPixel(startX, startY);
                         }
                         break;
                     case MotionEvent.ACTION_MOVE:
                         if (originalBitmap != null) {
-                            // Apply the startPixel color to all touched pixels
-                            int x = (int) event.getX();
-                            int y = (int) event.getY();
-                            pixels[y * originalBitmap.getWidth() + x] = startPixel;
-                            Bitmap newBitmap = Bitmap.createBitmap(pixels, originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
-                            imageView.setImageBitmap(newBitmap);
-                            Toast.makeText(photo.this, "d", Toast.LENGTH_SHORT).show();
+                            // 터치 시작점의 좌표
+//                            int startX = (int) (event.getX() * originalBitmap.getWidth() / imageViewWidth);
+//                            int startY = (int) (event.getY() * originalBitmap.getHeight() / imageViewHeight);
+                            int startX = (int) event.getX();
+                            int startY = (int) event.getY();
+//                            System.out.println("터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
+
+                            scaleFactor = (double)imageView.getHeight() / (double)originalBitmap.getHeight();
+//                            System.out.println("scaleFactor#####");
+//                            System.out.println(scaleFactor);
+
+
+                            startX -= 410;
+                            startY /= scaleFactor;
+                            startX /= scaleFactor;
+
+//                            System.out.println("수정된 터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
+//
+//                            System.out.println("좌표####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
+
+                            // Check if the touch coordinates are within the Bitmap bounds
+                            if (startX >= 0 && startX < originalBitmap.getWidth() && startY >= 0 && startY < originalBitmap.getHeight()) {
+                                // 터치된 영역의 색상
+                                //int touchColor = originalBitmap.getPixel(startX, startY);
+
+                                // Apply the touchColor to all touched pixels in the specified radius
+                                //int radius = 3; // 원하는 반경 설정
+
+                                // Apply the touchColor to all touched pixels in the specified radius
+                                int radius = 8; // 반경 설정
+                                int centerX = startX;
+                                int centerY = startY;
+
+                                for (int dx = -radius; dx <= radius; dx++) {
+                                    for (int dy = -radius; dy <= radius; dy++) {
+                                        int x = startX + dx;
+                                        int y = startY + dy;
+
+                                        // 픽셀이 원 내부에 있는지 확인
+                                        if ((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY) <= radius * radius) {
+                                            // 픽셀이 이미지 내부에 있는지도 추가로 확인
+                                            if (x >= 0 && x < originalBitmap.getWidth() && y >= 0 && y < originalBitmap.getHeight()) {
+                                                pixels[y * originalBitmap.getWidth() + x] = touchColor;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Create a new Bitmap and set the modified pixels
+                                Bitmap newBitmap = Bitmap.createBitmap(originalBitmap.getWidth(), originalBitmap.getHeight(), Bitmap.Config.ARGB_8888);
+                                newBitmap.setPixels(pixels, 0, originalBitmap.getWidth(), 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight());
+
+                                // Update the UI on the main thread
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (newBitmap != null && !newBitmap.sameAs(originalBitmap)) {
+                                            imageView.setImageBitmap(newBitmap);
+                                            imageView.invalidate();
+                                        }
+                                    }
+                                });
+                            }
                         }
                         break;
+
                     case MotionEvent.ACTION_UP:
                         originalBitmap = null;
                         pixels = null;
@@ -130,9 +264,8 @@ public class photo extends AppCompatActivity {
         });
 
 
-
-
     }
+
 
     private Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
@@ -149,7 +282,6 @@ public class photo extends AppCompatActivity {
 
         return bitmap;
     }
-
 
     private void recognizeFace(ImageView imageView) {
         try {
@@ -183,8 +315,8 @@ public class photo extends AppCompatActivity {
             faceCascade.detectMultiScale(gray2, faces, 1.3, 5);
 
             for (Rect rect : faces.toArray()) {
-                System.out.println("인식된 얼굴 객체 좌표 :");
-                System.out.println(rect);
+//                System.out.println("인식된 얼굴 객체 좌표 :");
+//                System.out.println(rect);
                 Imgproc.rectangle(originalMatImg, rect.tl(), rect.br(), new Scalar(255, 0, 0), 8);
             }
             Bitmap resultBitmapImg = Bitmap.createBitmap(gray2.cols(), gray2.rows(), Bitmap.Config.ARGB_8888);
@@ -194,7 +326,6 @@ public class photo extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    
     private void saveBitmapToFile(Bitmap bitmap) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
         String timestamp = sdf.format(new Date());
@@ -228,7 +359,6 @@ public class photo extends AppCompatActivity {
             Toast.makeText(this, "파일 저장 중 오류가 발생했습니다.", Toast.LENGTH_SHORT).show();
         }
     }
-
     private Bitmap getBitmapFromImageView(ImageView imageView) {
         // 이미지뷰에서 Drawable을 가져옵니다.
         Drawable drawable = imageView.getDrawable();

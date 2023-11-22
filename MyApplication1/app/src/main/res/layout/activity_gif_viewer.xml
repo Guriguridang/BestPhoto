@@ -11,11 +11,17 @@
 <!--    android:layout_width="310dp"-->
 <!--    android:layout_height="290dp"-->
 
+<!--    맥북-->
+<!--    android:layout_width="500dp"-->
+<!--    android:layout_height="350dp"-->
+
     <ImageView
         android:id="@+id/m_imageView"
-        android:layout_width="500dp"
-        android:layout_height="340dp"
-        android:layout_marginTop="30dp"
+        android:background="@drawable/round_backgroud_border_black"
+        android:padding="3dp"
+        android:layout_width="370dp"
+        android:layout_height="280dp"
+        android:layout_marginTop="10dp"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -32,6 +38,8 @@
         app:layout_constraintBottom_toTopOf="@+id/llButtons"
         app:layout_constraintTop_toBottomOf="@id/m_imageView">
 
+<!--        app:layout_constraintVertical_bias="1.0"-->
+<!--        tools:layout_editor_absoluteX="0dp">-->
 
         <LinearLayout
             android:id="@+id/llImagesContainer"
@@ -44,42 +52,28 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-
     <LinearLayout
         android:id="@+id/llButtons"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#FFFFFF"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
             android:id="@+id/btnCapture"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="100dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="50dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/gif_btn"
-            android:onClick="onCaptureButtonClicked"
             android:text="재촬영"
-            android:textSize="16sp" />
+            android:onClick="onCaptureButtonClicked" />
 
         <Button
             android:id="@+id/btnGallery"
             android:layout_width="0dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="50dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/gif_btn"
-            android:onClick="onGalleryButtonClicked"
             android:text="갤러리"
-            android:textSize="16sp" />
+            android:onClick="onGalleryButtonClicked" />
 
         <!--        <Button-->
         <!--            android:id="@+id/btnExtractFrames"-->
@@ -93,14 +87,9 @@
         <Button
             android:id="@+id/btnNext"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="50dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginRight="100dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/gif_btn"
-            android:text="완성"
-            android:textSize="16sp" />
+            android:text="결정완료" />
     </LinearLayout>
 
 

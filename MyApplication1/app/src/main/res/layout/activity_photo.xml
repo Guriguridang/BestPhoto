@@ -9,42 +9,57 @@
 
     <ImageView
         android:id="@+id/image"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="80dp"
-        android:layout_marginBottom="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintDimensionRatio="H,3:4"
         android:scaleType="fitCenter"
-        app:layout_constraintBottom_toTopOf="@+id/buttonContainer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
         android:id="@+id/buttonContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_margin="16dp">
 
         <Button
-            android:id="@+id/btn_editphoto"
+            android:id="@+id/btn_reload"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/gif_btn"
             android:layout_weight="1"
-            android:text="보정하기" />
+            android:text="되돌리기" />
+
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="이메일 입력"
+            android:inputType="textEmailAddress"
+            android:textColor="#3A3434"
+            android:textColorHint="#B7806C6C" />
+
+        <Button
+            android:id="@+id/send"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="이미지 전송" />
 
         <Button
             android:id="@+id/btn_savegallery"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:background="@drawable/gif_btn"
-            android:layout_marginLeft="50dp"
             android:layout_weight="1"
             android:text="저장하기" />
     </LinearLayout>
