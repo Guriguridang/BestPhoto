@@ -17,15 +17,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <HorizontalScrollView
-        android:contentDescription="하고 싶은 설명"
 
+    <HorizontalScrollView
         android:id="@+id/horizontalScrollView"
+
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:layout_below="@id/m_imageView"
+        android:contentDescription="하고 싶은 설명"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@+id/llButtons"
         app:layout_constraintTop_toBottomOf="@id/m_imageView"
-        android:fillViewport="true">
+        app:layout_constraintVertical_bias="1.0"
+        tools:layout_editor_absoluteX="0dp">
 
         <LinearLayout
             android:id="@+id/llImagesContainer"
@@ -37,8 +41,6 @@
 
         </LinearLayout>
     </HorizontalScrollView>
-
-
 
     <LinearLayout
         android:id="@+id/llButtons"

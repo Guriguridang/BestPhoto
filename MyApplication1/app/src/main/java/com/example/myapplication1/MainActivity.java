@@ -33,13 +33,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final Button btn_start=(Button)findViewById(R.id.btn_start);
+        final Button btn_start =(Button)findViewById(R.id.btn_start);
+        final Button btn_swap = (Button)findViewById(R.id.btn_swap);
+
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent=new Intent(MainActivity.this, CameraActivity.class);
                 startActivity(intent);
 
+            }
+        });
+
+        btn_swap.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(MainActivity.this, FaceSwapActivity.class);
+                startActivity(intent);
             }
         });
 
