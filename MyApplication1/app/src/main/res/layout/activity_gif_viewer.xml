@@ -11,13 +11,17 @@
 <!--    android:layout_width="310dp"-->
 <!--    android:layout_height="290dp"-->
 
+<!--    맥북-->
+<!--    android:layout_width="500dp"-->
+<!--    android:layout_height="350dp"-->
+
     <ImageView
         android:id="@+id/m_imageView"
         android:background="@drawable/round_backgroud_border_black"
-        android:padding="2dp"
-        android:layout_width="500dp"
-        android:layout_height="350dp"
-        android:layout_marginTop="30dp"
+        android:padding="3dp"
+        android:layout_width="370dp"
+        android:layout_height="280dp"
+        android:layout_marginTop="10dp"
         android:scaleType="fitCenter"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

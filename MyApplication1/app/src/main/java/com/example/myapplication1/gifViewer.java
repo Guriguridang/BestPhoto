@@ -152,18 +152,24 @@ public class gifViewer extends AppCompatActivity {
                 BitmapFactory.decodeFile(imageUriString, options);
 
                 // 현재 내 맥북은 960/1280
+                // 갤탭은 1932/2576
                 int imageWidth = options.outWidth;
                 int imageHeight = options.outHeight;
+//                System.out.println("imageHeight====" + imageHeight);
+//                System.out.println("imageWidth====" + imageWidth);
 
                 // 무조건 1이 나옴
                 int scaleFactor = Math.min( (imageWidth / targetWidth), (imageHeight / targetHeight));
 
 
-                if (j==0) {
-                    scaleFactor2 = ((double)imageHeight / (double)targetHeight);
-                }
+//                if (j==0) {
+//                    // 맥북
+//                    // 여기서 설정하는게 아닌듯?? 왜냐면 imageHeight는 원본 사진임.
+//                    //scaleFactor2 = ((double)imageHeight / (double)targetHeight);
+//                    System.out.println("scaleFactor ====" + scaleFactor2);
+//                }
 
-                System.out.println("scaleFactor#####" + scaleFactor2);
+//                System.out.println("scaleFactor#####" + scaleFactor2);
 
                 options.inJustDecodeBounds = false;
                 options.inSampleSize = scaleFactor;
@@ -196,9 +202,17 @@ public class gifViewer extends AppCompatActivity {
 
                 // 얼굴 인식
                 // 갤러리에서 불러온 이미지를 얼굴객체를 인식하기 위해 Mat 형식으로 변환
+                // 크기: 갤탭 기준 966, 1288
                 Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
                 Mat originalMatImg = new Mat();
                 Utils.bitmapToMat(bitmap, originalMatImg);
+
+                if (j==0) {
+                    // 여기서 scaleFactor2 설정! for 좌표터치 싱크
+                    // 1.66
+                    scaleFactor2 = ((double)bitmap.getHeight() / (double)targetHeight);
+                }
+
 
                 // 이미지를 분석하기 위해 흑백이미지로 변환
                 Mat gray = new Mat();
@@ -265,10 +279,11 @@ public class gifViewer extends AppCompatActivity {
                                 // 터치반응은 이미지의 좌우 약 100만큼 넘어가도 터치반응이 된다.
                                 // Rect 객체는 아무래도 이미지부터 시작하는듯?
                                 // y도 40정도 차이가 있는데, 단위의 차이인가..?
-                                System.out.println("터치좌표");
-                                System.out.println(curY);
-                                System.out.println(curX);
-                                System.out.println("수정후 터치좌표");
+//                                System.out.println("scaleFactor ====" + scaleFactor2);
+//                                System.out.println("터치좌표");
+//                                System.out.println(curY);
+//                                System.out.println(curX);
+//                                System.out.println("수정후 터치좌표");
 
 
                                 //curY = (curY*scaleFactor2);
@@ -276,13 +291,13 @@ public class gifViewer extends AppCompatActivity {
                                 double nowCurY = (curY*scaleFactor2);
                                 double nowCurX = ((curX-100)*scaleFactor2);
 
-                                System.out.println("수정후 터치좌표");
-                                System.out.println(nowCurY);
-                                System.out.println(nowCurX);
-
-                                System.out.println("얼굴좌표");
-                                System.out.println(s.y + "부터 " + (s.y + s.height));
-                                System.out.println(s.x + "부터 " + (s.x + s.width));
+//                                System.out.println("수정후 터치좌표");
+//                                System.out.println(nowCurY);
+//                                System.out.println(nowCurX);
+//
+//                                System.out.println("얼굴좌표");
+//                                System.out.println(s.y + "부터 " + (s.y + s.height));
+//                                System.out.println(s.x + "부터 " + (s.x + s.width));
 
                                 if( (s.y <= nowCurY) && (nowCurY <= (s.y + s.height)) && (s.x <= nowCurX) && (nowCurX <= (s.x + s.width))) {
 
@@ -318,7 +333,7 @@ public class gifViewer extends AppCompatActivity {
 
                     public void swapOne(Mat originalMatImg, Rect r, Integer i) {
 
-                        System.out.println("############시작");
+//                        System.out.println("############시작");
                         Rect sourceFaceRect = r;
                         Rect targetFaceRect = targetfaces.toArray()[i];
 
@@ -386,7 +401,7 @@ public class gifViewer extends AppCompatActivity {
                         Bitmap bitmap4 = Bitmap.createBitmap(targetImg.cols(), targetImg.rows(), Bitmap.Config.ARGB_8888);
                         Utils.matToBitmap(targetImg, bitmap4);
                         imageView.setImageBitmap(bitmap4);
-                        System.out.println("############끝");
+//                        System.out.println("############끝");
                     }
 
 
@@ -400,7 +415,7 @@ public class gifViewer extends AppCompatActivity {
         } else if ("com.example.ACTION_TYPE_2".equals(action)) {
             // 갤러리
             String imageUriString = getIntent().getStringExtra("imageuri");
-            System.out.println("uri ====" + imageUriString);
+//            System.out.println("uri ====" + imageUriString);
 
             if (imageUriString != null) {
                 Uri imageUri = Uri.parse(imageUriString);
@@ -434,7 +449,7 @@ public class gifViewer extends AppCompatActivity {
 
                     Utils.matToBitmap(targetImg, bitmap);
                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG,90,stream);
+                    bitmap.compress(Bitmap.CompressFormat.JPEG,95,stream);
                     byte[] byteArray = stream.toByteArray();
 
                     intent.putExtra("img", byteArray);
@@ -444,7 +459,7 @@ public class gifViewer extends AppCompatActivity {
                 catch (Exception e){
                     Toast.makeText(gifViewer.this,"byte=0",Toast.LENGTH_SHORT).show();
                     Toast.makeText(gifViewer.this,e.toString(),Toast.LENGTH_SHORT).show();
-                    System.out.println(e.toString());
+                    //System.out.println(e.toString());
                 }
 
             }
@@ -492,8 +507,8 @@ public class gifViewer extends AppCompatActivity {
 
             // 인식된 얼굴에 사각형으로 표시
             for (Rect rect : faces.toArray()) {
-                System.out.println("인식된 얼굴 객체 좌표 :");
-                System.out.println(rect);
+//                System.out.println("인식된 얼굴 객체 좌표 :");
+//                System.out.println(rect);
                 Imgproc.rectangle(originalMatImg, rect.tl(), rect.br(), new Scalar(255, 0, 0), 8);
             }
             // imageView2에 결과를 보여주기 위한 처리

@@ -46,7 +46,7 @@ public class photo extends AppCompatActivity {
     private float prevX = -1;
     private float prevY = -1;
 
-    double scaleFactor = 1.46;
+    double scaleFactor = 1.66;
 
     int touchColor;
 
@@ -118,23 +118,23 @@ public class photo extends AppCompatActivity {
 //                            int startY = (int) (event.getY() * originalBitmap.getHeight() / imageViewHeight);
                             int startX = (int) event.getX();
                             int startY = (int) event.getY();
-                            System.out.println("터치좌표#####");
-                            System.out.println(startY);
-                            System.out.println(startX);
+//                            System.out.println("터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
 
                             scaleFactor = (double)imageView.getHeight() / (double)originalBitmap.getHeight();
-                            System.out.println("scaleFactor#####");
-                            System.out.println(scaleFactor);
+//                            System.out.println("scaleFactor#####");
+//                            System.out.println(scaleFactor);
 
 
 
-                            startX -= 300;
+                            startX -= 410;
                             startY /= scaleFactor;
                             startX /= scaleFactor;
 
-                            System.out.println("수정된 터치좌표#####");
-                            System.out.println(startY);
-                            System.out.println(startX);
+//                            System.out.println("수정된 터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
 
 
                             // Check if the touch coordinates are within the Bitmap bounds
@@ -154,26 +154,26 @@ public class photo extends AppCompatActivity {
 //                            int startY = (int) (event.getY() * originalBitmap.getHeight() / imageViewHeight);
                             int startX = (int) event.getX();
                             int startY = (int) event.getY();
-                            System.out.println("터치좌표#####");
-                            System.out.println(startY);
-                            System.out.println(startX);
+//                            System.out.println("터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
 
                             scaleFactor = (double)imageView.getHeight() / (double)originalBitmap.getHeight();
-                            System.out.println("scaleFactor#####");
-                            System.out.println(scaleFactor);
+//                            System.out.println("scaleFactor#####");
+//                            System.out.println(scaleFactor);
 
 
-                            startX -= 300;
+                            startX -= 410;
                             startY /= scaleFactor;
                             startX /= scaleFactor;
 
-                            System.out.println("수정된 터치좌표#####");
-                            System.out.println(startY);
-                            System.out.println(startX);
-
-                            System.out.println("좌표####");
-                            System.out.println(startY);
-                            System.out.println(startX);
+//                            System.out.println("수정된 터치좌표#####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
+//
+//                            System.out.println("좌표####");
+//                            System.out.println(startY);
+//                            System.out.println(startX);
 
                             // Check if the touch coordinates are within the Bitmap bounds
                             if (startX >= 0 && startX < originalBitmap.getWidth() && startY >= 0 && startY < originalBitmap.getHeight()) {
@@ -184,7 +184,7 @@ public class photo extends AppCompatActivity {
                                 //int radius = 3; // 원하는 반경 설정
 
                                 // Apply the touchColor to all touched pixels in the specified radius
-                                int radius = 10; // 반경 설정
+                                int radius = 8; // 반경 설정
                                 int centerX = startX;
                                 int centerY = startY;
 
@@ -314,8 +314,8 @@ public class photo extends AppCompatActivity {
             faceCascade.detectMultiScale(gray2, faces, 1.3, 5);
 
             for (Rect rect : faces.toArray()) {
-                System.out.println("인식된 얼굴 객체 좌표 :");
-                System.out.println(rect);
+//                System.out.println("인식된 얼굴 객체 좌표 :");
+//                System.out.println(rect);
                 Imgproc.rectangle(originalMatImg, rect.tl(), rect.br(), new Scalar(255, 0, 0), 8);
             }
             Bitmap resultBitmapImg = Bitmap.createBitmap(gray2.cols(), gray2.rows(), Bitmap.Config.ARGB_8888);
