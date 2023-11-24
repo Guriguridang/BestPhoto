@@ -58,7 +58,7 @@ public class CameraActivity extends AppCompatActivity {
 
     public ExecutorService mCameraExecutor = Executors.newSingleThreadExecutor();
     private static final int PICK_IMAGE_REQUEST = 1;
-    private int currentLensFacing=1;
+    private int currentLensFacing=0;
     private Camera camera;
     ArrayList<ParcelableFile> photoFile=new ArrayList<>();
     ArrayList<ParcelableFile> flipFile=new ArrayList<>();

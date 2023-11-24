@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Button btn_start =(Button)findViewById(R.id.btn_start);
-        final Button btn_swap = (Button)findViewById(R.id.btn_swap);
+        //final Button btn_swap = (Button)findViewById(R.id.btn_swap);
 
         btn_start.setOnClickListener(new View.OnClickListener() {
             @Override

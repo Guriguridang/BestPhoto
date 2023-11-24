@@ -225,7 +225,7 @@ public class gifViewer extends AppCompatActivity {
 
                 // Mat 이미지형식으로부터 그 안에있는 사람들의 얼굴들을 인식
                 //faceCascade.detectMultiScale(gray, faces, 1.11, 5);
-                faceCascade.detectMultiScale(gray, faces, 1.11, 16);
+                faceCascade.detectMultiScale(gray, faces, 1.11, 13);
 
 
                 // 첫번째 프레임은 디폴트이미지이기 때문에 전역으로 백업
