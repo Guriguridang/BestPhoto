@@ -4,12 +4,12 @@
     <!-- cache 라는 이름으로 실제캐시경로 생성-->
     <cache-path
         name="cache"
-        path="." />
+        path="/" />
 
     <!--Context.getFilesDir() 내부 저장소-->
     <files-path
         name="Capture"
-        path="." />
+        path="/" />
 
     <!--  Environment.getExternalStorageDirectory() 외부 저장소-->
     <external-path

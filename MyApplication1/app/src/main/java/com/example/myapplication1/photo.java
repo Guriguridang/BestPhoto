@@ -1,5 +1,6 @@
 package com.example.myapplication1;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -13,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -21,6 +23,7 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -263,6 +266,14 @@ public class photo extends AppCompatActivity {
             }
         });
 
+        Button share=findViewById(R.id.share);
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                share(getBitmapFromImageView(imageView));
+            }
+        });
+
 
     }
 
@@ -352,6 +363,7 @@ public class photo extends AppCompatActivity {
                 values.put(MediaStore.Images.Media.IS_PENDING, 0);
                 contentResolver.update(item, values, null, null);
             }
+
             Toast.makeText(this, "갤러리에 파일을 저장하였습니다.", Toast.LENGTH_SHORT).show();
 
         } catch (IOException e) {
@@ -378,6 +390,32 @@ public class photo extends AppCompatActivity {
 
             return bitmap;
         }
+    }
+
+    private void share(Bitmap bitmap){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA);
+        String timestamp = sdf.format(new Date());
+        String filename = "sharing_" + timestamp + ".jpg";
+
+        File file=new File(getCacheDir(),filename);
+        try{
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream);
+            outputStream.flush();
+            outputStream.close();
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+        Uri uri=FileProvider.getUriForFile(this,"com.example.myapplication1.provider",file);
+
+        Intent shareIntent=new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/*");
+        shareIntent.putExtra(Intent.EXTRA_STREAM,uri);
+        shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivity(Intent.createChooser(shareIntent,"이미지 공유"));
+
     }
 
 }
